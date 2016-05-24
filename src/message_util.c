@@ -14,7 +14,7 @@ void displayHeader(akh_pdu_header header)
 {
     printf("ver => %d\n", header.ver);
     printf("msg_type => %d\n", header.msg_type);
-    printf("seq_num => %d\n", header.seq_num);
+    printf("seq_num => %u\n", header.seq_num);
     printf("body_len => %d\n", header.body_len);
 }
 
