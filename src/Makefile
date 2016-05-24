@@ -1,5 +1,8 @@
 CC = gcc
-CFLAGS = -g -Wall -W -O2 -c # debugging, compiler warnings, warning, optimize, object file
+CFLAGS = -g -Wall -W -O2 -c -I/usr/local/opt/openssl/include 
+# debugging, compiler warnings, warning, optimize, object file
+
+LDFLAGS = -lssl -lcrypto -L/usr/local/opt/openssl/lib #link the ssl library, link the crypto library, library location
 
 MESSAGE_UTIL = message_util
 ERROR_HANDLING = error_handling
@@ -18,13 +21,13 @@ PORT = 9190
 
 
 compile: $(FILES) 
-	$(CC) $(CFLAGS) $(FILES)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(FILES)
 
 server: $(OBJ) $(AKH_SERVER_MAIN).o
 	$(CC) $(CLIENT_O) $(OBJ) $(AKH_SERVER_MAIN).o -o $(SERVER)
 
 client: $(OBJ) $(AKH_CLIENT_MAIN).o
-	$(CC) $(CLIENT_O) $(OBJ) $(AKH_CLIENT_MAIN).o -o $(CLIENT)
+	$(CC) $(CLIENT_O) $(OBJ) $(AKH_CLIENT_MAIN).o -o $(CLIENT) $(LDFLAGS)
 
 run_server: $(SERVER)
 	./$(SERVER) $(PORT)

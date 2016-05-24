@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <openssl/rand.h> //include openssl
 
 #include "message.h"
 #include "message_util.h"
@@ -31,8 +32,16 @@ int main(int argc, char *argv[])
     	error_handling("create socket error");
     }
 
+    // generate unsigned long int random number
+    uint32_t randSeqNum; // the random sequence number
+    unsigned char seqNumBuf[sizeof(randSeqNum)];
+    int rc = RAND_bytes(seqNumBuf, sizeof(seqNumBuf));
+    if (rc!=1){
+      fprintf(stderr, "Failed to generate random bytes\n");
+    }
+    randSeqNum = *((uint32_t *)seqNumBuf);
     // request download
-    akh_pdu_header header = createHeader(RD, 0);
+    akh_pdu_header header = createHeader(RD, randSeqNum);
     akh_pdu_body body = "test.txt";
     packet pac;
     size_t pac_len = createPacket(&pac, header, body, strlen(body));
