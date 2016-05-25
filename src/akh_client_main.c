@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     unsigned char seqNumBuf[sizeof(randSeqNum)];
     int rc = RAND_bytes(seqNumBuf, sizeof(seqNumBuf));
     if (rc!=1){
-      fprintf(stderr, "Failed to generate random bytes\n");
+    	error_handling("Failed to generate random bytes");
     }
     randSeqNum = *((uint32_t *)seqNumBuf);
     // request download
