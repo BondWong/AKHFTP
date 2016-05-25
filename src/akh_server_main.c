@@ -25,10 +25,14 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv_adr, clnt_adr;
 
     char pac[MAX_BUFFER_SIZE];
-
+    // create server socket
     serv_sock = socket(PF_INET, SOCK_DGRAM, 0);
     if(serv_sock == -1)
-        error_handling("UPD socket creation error");
+        error_handling("UDP socket creation error");
+    // set socket so that port can be reuse immediately after closure
+    if (setsockopt(serv_sock, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) == -1 ){
+	error_handling("Setting socket option to enable reusable port error");	
+    }
 
     memset(&serv_adr, 0, sizeof(serv_adr));
     serv_adr.sin_family = AF_INET;
