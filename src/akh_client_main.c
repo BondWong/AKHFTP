@@ -4,14 +4,12 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <openssl/rand.h> //include openssl
 
 #include "error_handling.h"
 #include "message.h"
 #include "message_util.h"
 #include "security_util.h"
 
-#define MAX_BUFFER_SIZE 128 * 1024 // maximum buffer size 128 kb
 int main(int argc, char *argv[])
 {
     if(argc != 3) {
@@ -33,10 +31,9 @@ int main(int argc, char *argv[])
     	error_handling("create socket error");
     }
 
-    uint32_t randSeqNum = randNum(); // the random sequence number
 
     // request download
-    akh_pdu_header header = createHeader(RD, randSeqNum);
+    akh_pdu_header header = createHeader(RD, randNum());
     akh_pdu_body body = "test.txt";
     packet pac;
     size_t pac_len = createPacket(&pac, header, body, strlen(body));

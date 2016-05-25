@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     socklen_t clnt_adr_sz;
     struct sockaddr_in serv_adr, clnt_adr;
 
-    char pac[MAX_LEN];
+    char pac[MAX_BUFFER_SIZE];
 
     serv_sock = socket(PF_INET, SOCK_DGRAM, 0);
     if(serv_sock == -1)
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
         error_handling("bind() error");
 
     clnt_adr_sz = sizeof(clnt_adr);
-    pac_len = recvfrom(serv_sock, pac, MAX_LEN, 0, (struct sockaddr *)&clnt_adr, &clnt_adr_sz);
+    pac_len = recvfrom(serv_sock, pac, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&clnt_adr, &clnt_adr_sz);
     displayHeader(*(akh_pdu_header *)pac);
     printf("body => %s\n", pac + sizeof(akh_pdu_header));
 
