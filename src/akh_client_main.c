@@ -6,9 +6,10 @@
 #include <sys/socket.h>
 #include <openssl/rand.h> //include openssl
 
+#include "error_handling.h"
 #include "message.h"
 #include "message_util.h"
-#include "error_handling.h"
+#include "security_util.h"
 
 #define MAX_BUFFER_SIZE 128 * 1024 // maximum buffer size 128 kb
 int main(int argc, char *argv[])
@@ -32,14 +33,8 @@ int main(int argc, char *argv[])
     	error_handling("create socket error");
     }
 
-    // generate unsigned long int random number
-    uint32_t randSeqNum; // the random sequence number
-    unsigned char seqNumBuf[sizeof(randSeqNum)];
-    int rc = RAND_bytes(seqNumBuf, sizeof(seqNumBuf));
-    if (rc!=1){
-    	error_handling("Failed to generate random bytes");
-    }
-    randSeqNum = *((uint32_t *)seqNumBuf);
+    uint32_t randSeqNum = randNum(); // the random sequence number
+
     // request download
     akh_pdu_header header = createHeader(RD, randSeqNum);
     akh_pdu_body body = "test.txt";
