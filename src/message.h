@@ -1,5 +1,5 @@
-#ifndef __message_h__
-#define __message_h__
+#ifndef __MESSAGE_H__
+#define __MESSAGE_H__
 
 #include <stdint.h>
 
