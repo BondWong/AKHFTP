@@ -1,5 +1,5 @@
-#ifndef __security_util_h__
-#define __security_util_h__
+#ifndef __SECURITY_UTIL_H__
+#define __SECURITY_UTIL_H__
 
 #include <openssl/rand.h> //include openssl
 

@@ -25,7 +25,6 @@ int main(int argc, char *argv[])
     serv_adr.sin_addr.s_addr = inet_addr(argv[1]);
     serv_adr.sin_port = htons(atoi(argv[2]));
 
-
     sock = socket(PF_INET, SOCK_DGRAM, 0);
     if(sock == -1) {
     	error_handling("create socket error");
@@ -34,17 +33,16 @@ int main(int argc, char *argv[])
 
     // request download
     akh_pdu_header header = createHeader(RD, randNum());
-    akh_pdu_body body = "test.txt";
+    akh_pdu_body body = "test_main.c";
     packet pac;
     size_t pac_len = createPacket(&pac, header, body, strlen(body));
 
-    char response[20];
-    int str_len;
+    char response[MAX_BUFFER_SIZE];
+    unsigned int str_len;
 
     // send RD to server
     sendto(sock, pac, pac_len, 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
-    str_len = recvfrom(sock, response, 20, 0, (struct sockaddr *)&from_adr, &adr_sz);
-    response[str_len] = 0;
+    str_len = recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&from_adr, &adr_sz);
 
     // get file size
     char fsize[4];
