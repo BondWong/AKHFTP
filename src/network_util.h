@@ -7,7 +7,7 @@
 
 #include "message.h"
 
-void akh_send(int sock, packet pac, size_t pac_len, int send_options, int rece_options, 
+void akh_send(int* sock, packet pac, size_t pac_len, int send_options, int rece_options, 
 	struct sockaddr* serv_adr, struct sockaddr* from_adr, socklen_t* adr_sz, char* response, int response_sz);
 
 #endif
