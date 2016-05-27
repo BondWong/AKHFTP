@@ -22,13 +22,13 @@ off_t connection_download_client(int *sock, struct sockaddr_in *serv_adr, char *
     socklen_t adr_sz;
     struct sockaddr_in from_adr;
     unsigned int str_len;
-    char response[MAX_BUFFER_SIZE];
+    char response[MAX_RESPONSE_SIZE];
 
     printf("\nrequest pac\n");
     displayHeader(*(akh_pdu_header *)pac);
 
     // send RD package to server and waiting for server's response
-    akh_send(sock, pac, pac_len, 0, 0, (struct sockaddr *) serv_adr, (struct sockaddr *)&from_adr, &adr_sz, response, MAX_BUFFER_SIZE);
+    akh_send(sock, pac, pac_len, 0, 0, (struct sockaddr *) serv_adr, (struct sockaddr *)&from_adr, &adr_sz, response, MAX_RESPONSE_SIZE);
 
     printf("\nresponse pac\n");
     displayHeader(*(akh_pdu_header *)response);
