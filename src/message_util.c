@@ -18,16 +18,16 @@ void displayHeader(akh_pdu_header header)
     printf("body_len => %d\n", header.body_len);
 }
 
-size_t createPacket(packet *pac, akh_pdu_header header, akh_pdu_body body, size_t body_len)
+size_t createPacket(packet *pac, akh_pdu_header *header, akh_pdu_body body, size_t body_len)
 {
-    header.body_len = body_len;
-    *pac = (packet)malloc(sizeof(header) + body_len);
+    header->body_len = body_len;
+    *pac = (packet)malloc(sizeof(akh_pdu_header) + body_len);
     if(*pac == NULL)
         return 0;
 
-    memcpy(*pac, &header, sizeof(header));
-    memcpy(*pac + sizeof(header), body, body_len);
-    return sizeof(header) + body_len;
+    memcpy(*pac, header, sizeof(akh_pdu_header));
+    memcpy(*pac + sizeof(akh_pdu_header), body, body_len);
+    return sizeof(akh_pdu_header) + body_len;
 }
 
 void deletePacket(packet pac)

@@ -5,9 +5,15 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#include "error_handling.h"
 #include "message.h"
 #include "message_util.h"
-#include "error_handling.h"
+#include "file_util.h"
+#include "security_util.h"
+#include "connection.h"
+#include "file_transmission.h"
+#include "disconnection.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -16,15 +22,12 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    char filename[MAX_FILENAME_SIZE];
+    off_t filesize;
     int serv_sock;
-    char message[20] = "Thanks!";
-    char buf[20];
-    size_t pac_len;
-    int str_len;
-    socklen_t clnt_adr_sz;
     struct sockaddr_in serv_adr, clnt_adr;
-
     char pac[MAX_BUFFER_SIZE];
+    socklen_t clnt_adr_sz;
     // create server socket
     serv_sock = socket(PF_INET, SOCK_DGRAM, 0);
     if(serv_sock == -1)
@@ -42,12 +45,49 @@ int main(int argc, char *argv[])
     if(bind(serv_sock, (struct sockaddr *)&serv_adr, sizeof(serv_adr)) == -1)
         error_handling("bind() error");
 
-    clnt_adr_sz = sizeof(clnt_adr);
-    pac_len = recvfrom(serv_sock, pac, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&clnt_adr, &clnt_adr_sz);
-    displayHeader(*(akh_pdu_header *)pac);
-    printf("body => %s\n", pac + sizeof(akh_pdu_header));
+    int request_type = handle_request(&serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
 
-    sendto(serv_sock, message, strlen(message), 0, (struct sockaddr *)&clnt_adr, clnt_adr_sz);
+    if(request_type == RD) {
+        printf("< download request >\n");
+
+        connection_download_server(&serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
+        send_file();
+        disconnection_sender();
+    }
+
+    else if(request_type == RU) {
+        printf("< upload request >\n");
+
+        connection_upload_server();
+        recieve_file();
+        disconnection_reciever();
+    }
+
+
+
+
+    /* char message[20] = "Thanks!"; */
+    /* char buf[20]; */
+    /* size_t pac_len; */
+    /* int str_len; */
+    /*  */
+    /* char pac[MAX_BUFFER_SIZE]; */
+    /*  */
+    /* clnt_adr_sz = sizeof(clnt_adr); */
+    /* pac_len = recvfrom(serv_sock, pac, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&clnt_adr, &clnt_adr_sz); */
+    /* displayHeader(*(akh_pdu_header *)pac); */
+    /* printf("body => %s\n", pac + sizeof(akh_pdu_header)); */
+    /*  */
+    /* char *filename = pac + sizeof(akh_pdu_header); */
+    /*  */
+    /*  */
+    /* akh_pdu_header header = createHeader(AD, randNum()); */
+    /* off_t filesize = get_file_size(filename); */
+    /*  */
+    /* packet response; */
+    /* size_t response_len = createPacket(&response, header, (akh_pdu_body)&filesize, sizeof(off_t)); */
+    /* sendto(serv_sock, response, response_len, 0, (struct sockaddr *)&clnt_adr, clnt_adr_sz); */
+    /* deletePacket(response); */
 
 
     close(serv_sock);
