@@ -11,6 +11,7 @@
 #include "message.h"
 #include "message_util.h"
 #include "error_handling.h"
+#include "network_util.h"
 
 #define MAX_BUFFER_SIZE 128 * 1024 // maximum buffer size 128 kb
 
@@ -54,24 +55,7 @@ int main(int argc, char *argv[])
     int str_len;
 
     // send RD to server
-    int result;
-    fd_set sockset;
-    struct timeval tv;
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
-    FD_ZERO(&sockset);
-    FD_SET(sock, &sockset);
-
-    sendto(sock, pac, pac_len, 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
-    result = select(sock + 1, &sockset, NULL, NULL, &tv);
-    if(result == - 1) {
-   	 error_handling("create select error");
-    } else if(result == 1) {
-    	str_len = recvfrom(sock, response, 20, 0, (struct sockaddr *)&from_adr, &adr_sz);
-    	response[str_len] = 0;
-    } else {
-    	printf("timeout");
-    }
+    akh_send(sock, pac, pac_len, 0, 0, (struct sockaddr *)&serv_adr, (struct sockaddr *)&from_adr, &adr_sz, response, 20);
 
     // get file size
     char fsize[4];
@@ -91,16 +75,7 @@ int main(int argc, char *argv[])
     body = "1024"; // 1 kb
     pac_len = createPacket(&pac, header, body, strlen(body));
 
-    sendto(sock, pac, pac_len, 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
-    result = select(sock + 1, &sockset, NULL, NULL, &tv);
-    if(result == - 1) {
-	error_handling("create select error");
-    } else if (result == 1) {
-	printf("start receiving file data");
-    } else {
-    	printf("timeout");
-    }
-
+    akh_send(sock, pac, pac_len, 0, 0, (struct sockaddr *)&serv_adr, (struct sockaddr *)&from_adr, &adr_sz, response, 20);
     // start receiving file data
 
     close(sock);

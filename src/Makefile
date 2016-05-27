@@ -6,12 +6,13 @@ LDFLAGS = -lssl -lcrypto -L/usr/local/opt/openssl/lib #link the ssl library, lin
 
 MESSAGE_UTIL = message_util
 ERROR_HANDLING = error_handling
+NETWORK_UTIL = network_util
 
 AKH_SERVER_MAIN = akh_server_main
 AKH_CLIENT_MAIN = akh_client_main
 
-FILES = $(MESSAGE_UTIL).c $(ERROR_HANDLING).c $(AKH_SERVER_MAIN).c $(AKH_CLIENT_MAIN).c
-OBJ =  $(MESSAGE_UTIL).o $(ERROR_HANDLING).o
+FILES = $(MESSAGE_UTIL).c $(ERROR_HANDLING).c $(AKH_SERVER_MAIN).c $(AKH_CLIENT_MAIN).c $(NETWORK_UTIL).c
+OBJ =  $(MESSAGE_UTIL).o $(ERROR_HANDLING).o $(NETWORK_UTIL).o
 
 SERVER = server
 CLIENT = client
