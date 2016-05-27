@@ -14,6 +14,7 @@
 #define DR 0x0009 // Deny Request
 #define EA 0x000A // Error Alert
 
+#define MAX_FILENAME_SIZE 128
 #define MAX_BUFFER_SIZE (1024 * 128) // maximum buffer size 128 kb
 
 typedef struct tag_akh_pdu_header

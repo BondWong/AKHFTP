@@ -39,22 +39,18 @@ int main(int argc, char *argv[])
     printf("sock => %d\n", sock);
 
     if(strcmp(argv[3], "-d") == 0) {
-        printf("download request\n");
-        printf("filename: %s\n", argv[4]);
-
+        printf("< download request >\n");
 
         if( (filesize = connection_download_client(&sock, &serv_adr, filename)) == 0) {
     	    error_handling("fail connection error");
         }
-        printf("filesize: %d\n", filesize);
 
         recieve_file();
         disconnection_reciever();
     }
 
     else if(strcmp(argv[3], "-u") == 0) {
-        printf("upload request\n");
-        printf("filename: %s\n", argv[4]);
+        printf("< upload request >\n");
 
         connection_upload_client();
         send_file();
