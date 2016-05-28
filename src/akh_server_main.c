@@ -58,33 +58,6 @@ int main(int argc, char *argv[])
         disconnection_reciever();
     }
 
-
-
-
-    /* char message[20] = "Thanks!"; */
-    /* char buf[20]; */
-    /* size_t pac_len; */
-    /* int str_len; */
-    /*  */
-    /* char pac[MAX_BUFFER_SIZE]; */
-    /*  */
-    /* clnt_adr_sz = sizeof(clnt_adr); */
-    /* pac_len = recvfrom(serv_sock, pac, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&clnt_adr, &clnt_adr_sz); */
-    /* displayHeader(*(akh_pdu_header *)pac); */
-    /* printf("body => %s\n", pac + sizeof(akh_pdu_header)); */
-    /*  */
-    /* char *filename = pac + sizeof(akh_pdu_header); */
-    /*  */
-    /*  */
-    /* akh_pdu_header header = createHeader(AD, randNum()); */
-    /* off_t filesize = get_file_size(filename); */
-    /*  */
-    /* packet response; */
-    /* size_t response_len = createPacket(&response, header, (akh_pdu_body)&filesize, sizeof(off_t)); */
-    /* sendto(serv_sock, response, response_len, 0, (struct sockaddr *)&clnt_adr, clnt_adr_sz); */
-    /* deletePacket(response); */
-
-
     close(serv_sock);
     return 0;
 }

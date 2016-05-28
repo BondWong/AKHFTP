@@ -7,6 +7,7 @@
 #include "message_util.h"
 #include "file_util.h"
 #include "connection.h"
+#include "network_util.h"
 
 // request handle
 uint16_t handle_request(int *serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz, char *filename, off_t *filesize)
@@ -51,17 +52,13 @@ off_t connection_download_client(int *sock, struct sockaddr_in *serv_adr, char *
     packet pac;
     size_t pac_len = createPacket(&pac, &header, body, strlen(body));
 
-    // send RD package to server
-    sendto(*sock, pac, pac_len, 0, (struct sockaddr *)serv_adr, sizeof(*serv_adr));
-    deletePacket(pac);
-
     socklen_t adr_sz;
     struct sockaddr_in from_adr;
     unsigned int str_len;
-    char response[MAX_BUFFER_SIZE];
+    char response[MAX_RESPONSE_SIZE];
 
-    // recieve package from server
-    str_len = recvfrom(*sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&from_adr, &adr_sz);
+    // send RD package to server and waiting for server's response
+    akh_send(sock, pac, pac_len, 0, 0, (struct sockaddr *)serv_adr, (struct sockaddr *)&from_adr, &adr_sz, response, MAX_RESPONSE_SIZE);
 
     uint16_t msg_type = ((akh_pdu_header *)response)->msg_type;
     if(msg_type != AD) {

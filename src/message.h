@@ -16,6 +16,7 @@
 
 #define MAX_FILENAME_SIZE 128
 #define MAX_BUFFER_SIZE (1024 * 128) // maximum buffer size 128 kb
+#define MAX_RESPONSE_SIZE (1024 * 2) // maximum response size kb
 
 typedef struct tag_akh_pdu_header
 {
