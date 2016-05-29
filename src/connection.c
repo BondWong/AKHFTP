@@ -10,12 +10,12 @@
 #include "network_util.h"
 
 // request handle
-uint16_t handle_request(int *serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz, char *filename, off_t *filesize)
+uint16_t handle_request(int serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz, char *filename, off_t *filesize)
 {
     char pac[MAX_BUFFER_SIZE];
     size_t pac_len;
     *clnt_adr_sz = sizeof(struct sockaddr_in);
-    pac_len = recvfrom(*serv_sock, pac, MAX_BUFFER_SIZE, 0, (struct sockaddr *)clnt_adr, clnt_adr_sz);
+    pac_len = recvfrom(serv_sock, pac, MAX_BUFFER_SIZE, 0, (struct sockaddr *)clnt_adr, clnt_adr_sz);
     
     uint16_t msg_type = ((akh_pdu_header *)pac)->msg_type;
     char *requested_file;
@@ -43,7 +43,7 @@ uint16_t handle_request(int *serv_sock, struct sockaddr_in *clnt_adr, socklen_t 
 
 
 // when client makes connection with server for download
-off_t connection_download_client(int *sock, struct sockaddr_in *serv_adr, char *filename)
+off_t connection_download_client(int sock, struct sockaddr_in *serv_adr, char *filename)
 {
     // create RD package
     akh_pdu_header header = createHeader(RD, randNum());
@@ -52,22 +52,27 @@ off_t connection_download_client(int *sock, struct sockaddr_in *serv_adr, char *
     packet pac;
     size_t pac_len = createPacket(&pac, &header, body, strlen(body));
 
+    // send RD package to server
+    sendto(sock, pac, pac_len, 0, (struct sockaddr *)serv_adr, sizeof(*serv_adr));
+    deletePacket(pac);
+
     socklen_t adr_sz;
     struct sockaddr_in from_adr;
     unsigned int str_len;
-    char response[MAX_RESPONSE_SIZE];
+    char response[MAX_BUFFER_SIZE];
 
-    // send RD package to server and waiting for server's response
-    akh_send(sock, pac, pac_len, 0, 0, (struct sockaddr *)serv_adr, (struct sockaddr *)&from_adr, &adr_sz, response, MAX_RESPONSE_SIZE);
+    // recieve package from server
+    str_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&from_adr, &adr_sz, 3, 3);
 
-    uint16_t msg_type = ((akh_pdu_header *)response)->msg_type;
-    if(msg_type != AD) {
+    /* // send RD package to server and waiting for server's response */
+    /* akh_send(sock, pac, pac_len, 0, 0, (struct sockaddr *)serv_adr, (struct sockaddr *)&from_adr, &adr_sz, response, MAX_RESPONSE_SIZE); */
+
+    if(((akh_pdu_header *)response)->msg_type != AD) {
         printf("rejected by server\n");
         return 0;
     }
 
     off_t filesize = *(off_t *)( (akh_pdu_header *)response + 1 );
-
 
     printf("request pac\n");
     displayHeader(header);

@@ -36,12 +36,11 @@ int main(int argc, char *argv[])
     if(sock == -1) {
     	error_handling("create socket error");
     }
-    printf("sock => %d\n", sock);
 
     if(strcmp(argv[3], "-d") == 0) {
         printf("< download request >\n");
 
-        if( (filesize = connection_download_client(&sock, &serv_adr, filename)) == 0) {
+        if( (filesize = connection_download_client(sock, &serv_adr, filename)) == 0) {
     	    error_handling("fail connection error");
         }
 

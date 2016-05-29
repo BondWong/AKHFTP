@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     if(bind(serv_sock, (struct sockaddr *)&serv_adr, sizeof(serv_adr)) == -1)
         error_handling("bind() error");
 
-    int request_type = handle_request(&serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
+    int request_type = handle_request(serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
 
     if(request_type == RD) {
         printf("< download request >\n");
