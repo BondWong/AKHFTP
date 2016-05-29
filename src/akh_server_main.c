@@ -52,9 +52,22 @@ int main(int argc, char *argv[])
 
         connection_download_server(&serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
         send_file();
-        disconnection_sender();
+        //request disconnection and check if we need to retransmit missing segment
+        akh_disconn_response disconn_response = disconnection_sender(&serv_sock,&clnt_adr);
+        if (disconn_response.response_type == AC){
+            close(serv_sock);
+            return 0;
+        }
+        else if (disconn_response.response_type == RS){
+            printf("There are %u missing segments.\n",disconn_response.segment_num);
+            printf("List of missing segment's sequence number:\n");
+            for (uint32_t cnt=0; cnt < disconn_response.segment_num; cnt++ ) {
+                printf("%u\n", *((uint32_t *)(disconn_response.segment_list + cnt*sizeof(uint32_t))));
+            }
+            // Finish processing the response, free memory
+            free( disconn_response.segment_list );
+        }
     }
-
     else if(request_type == RU) {
         printf("< upload request >\n");
 

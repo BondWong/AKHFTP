@@ -29,5 +29,13 @@ typedef char * akh_pdu_body;
 
 typedef char * packet;
 
+typedef struct akh_disconnection_response
+{
+    uint16_t response_type; // the message type of the response to RS
+    uint32_t segment_size; // the size of one segment during transmission
+    uint32_t segment_num; // number of missing segment
+    char * segment_list; // the list of the sequence numbers of missing segements
+} akh_disconn_response;
+
 #endif
 

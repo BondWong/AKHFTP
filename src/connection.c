@@ -7,7 +7,7 @@
 #include "message_util.h"
 #include "file_util.h"
 #include "connection.h"
-
+#include "security_util.h"
 // request handle
 uint16_t handle_request(int *serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz, char *filename, off_t *filesize)
 {
@@ -24,7 +24,7 @@ uint16_t handle_request(int *serv_sock, struct sockaddr_in *clnt_adr, socklen_t 
         requested_file = pac + sizeof(akh_pdu_header);
     }
     else if(msg_type == RU) {
-        *filesize = (off_t *)(pac + sizeof(akh_pdu_header));
+        *filesize = *((off_t *)(pac + sizeof(akh_pdu_header)));
         requested_file = pac + sizeof(akh_pdu_header) + sizeof(off_t);
     }
     else
@@ -39,7 +39,6 @@ uint16_t handle_request(int *serv_sock, struct sockaddr_in *clnt_adr, socklen_t 
 
     return msg_type;
 }
-
 
 // when client makes connection with server for download
 off_t connection_download_client(int *sock, struct sockaddr_in *serv_adr, char *filename)
@@ -70,7 +69,6 @@ off_t connection_download_client(int *sock, struct sockaddr_in *serv_adr, char *
     }
 
     off_t filesize = *(off_t *)( (akh_pdu_header *)response + 1 );
-
 
     printf("request pac\n");
     displayHeader(header);
