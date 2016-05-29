@@ -68,7 +68,6 @@ off_t connection_download_client(int *sock, struct sockaddr_in *serv_adr, char *
 
     off_t filesize = *(off_t *)( (akh_pdu_header *)response + 1 );
 
-
     printf("request pac\n");
     displayHeader(header);
     printf("filename: %s\n", body);
