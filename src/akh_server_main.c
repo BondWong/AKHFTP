@@ -61,7 +61,8 @@ int main(int argc, char *argv[])
         else if (disconn_response.response_type == RS){
             printf("There are %u missing segments.\n",disconn_response.segment_num);
             printf("List of missing segment's sequence number:\n");
-            for (uint32_t cnt=0; cnt < disconn_response.segment_num; cnt++ ) {
+            uint32_t cnt;
+            for (cnt=0; cnt < disconn_response.segment_num; cnt++ ) {
                 printf("%u\n", *((uint32_t *)(disconn_response.segment_list + cnt*sizeof(uint32_t))));
             }
             // Finish processing the response, free memory
