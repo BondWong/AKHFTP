@@ -53,3 +53,6 @@ clean:
 	rm -rf *.gch
 	rm -rf $(SERVER) $(CLIENT)
 
+bond: compile
+	$(CC) $(CLIENT_O) $(OBJ) test_buffer.c -o test $(LDFLAGS)
+
