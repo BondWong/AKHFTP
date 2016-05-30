@@ -2,10 +2,13 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#include "disconnection.h"
-#include "security_util.h"
+#include "error_handling.h"
 #include "message.h"
 #include "message_util.h"
+#include "disconnection.h"
+#include "security_util.h"
+#include "network_util.h"
+
 
 // reciever uses to disconnect
 int disconnection_reciever()
@@ -59,5 +62,47 @@ akh_disconn_response disconnection_sender(int *sock, struct sockaddr_in *dst_add
         disconn_response.response_type = msg_type;
         return disconn_response;
     }
+}
+
+// if receiver accepted close request, return 0
+// if receipient is not ready to close, i.e. there is missing segments, return 1
+// otherwise, return 2;
+int disconnection_sender2(int sock, struct sockaddr_in *recv_adr, socklen_t *recv_adr_sz, akh_disconn_response *disconn_response)
+{
+    if(disconn_response->segment_list != NULL)
+        free(disconn_response->segment_list);
+
+    char response[MAX_BUFFER_SIZE];
+    ssize_t response_len;
+
+    // recieve package from receiver
+    response_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)recv_adr, recv_adr, TIMEOUT, NUM_TRY);
+    if(response_len == -1)
+    	error_handling("fail connection error");
+
+    disconn_response->response_type = ((akh_pdu_header *)response)->msg_type;
+
+    // if receiver accepted close request, return 0
+    if(disconn_response->response_type == AC)
+        return 0;
+    // if receipient is not ready to close, i.e. there is missing segments, return 1
+    else if(disconn_response->response_type == RS) {
+        disconn_response->segment_size = *((uint32_t *)(response + sizeof(akh_pdu_header)));
+        disconn_response->segment_num = *((uint32_t *)(response + sizeof(akh_pdu_header) + sizeof(uint32_t)));
+        disconn_response->segment_list = (uint32_t *)malloc(disconn_response->segment_num * sizeof(uint32_t));
+        // do not free memory here; after we finish using the segment_list, the memory can be freed.
+        memcpy(disconn_response->segment_list, response + sizeof(akh_pdu_header) + 2 * sizeof(uint32_t), disconn_response->segment_num * sizeof(uint32_t));
+
+
+        puts("Closure rejected. There are some missing segments!");
+        printf("segment_num => %d\n", disconn_response->segment_num);
+        int i;
+        for(i = 0; i < disconn_response->segment_num; i++)
+            printf("segment[%d] => %d\n", i, disconn_response->segment_list[i]);
+        return 1;
+    }
+    // otherwise, return 2;
+    else
+        return 2;
 }
 

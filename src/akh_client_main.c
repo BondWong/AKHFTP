@@ -53,16 +53,18 @@ int main(int argc, char *argv[])
 //        sendto(sock, AC_pac, AC_pac_len, 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
 //        deletePacket(AC_pac);
         /* This is a test for disconnection_sender() function: (2) RS */
+
         //create AC packet
         akh_pdu_header RS_header = createHeader(RS,randNum());
         packet RS_pac;
-        int num_missing_segment = 2; // the number of missing segments
-        char RS_body[sizeof(uint32_t)*(2+num_missing_segment)];
-        *((uint32_t *) RS_body) = 10; // Segment size
-        *((uint32_t *)(RS_body + sizeof(uint32_t))) = num_missing_segment; // Number of missing segments
-        *((uint32_t *)(RS_body + sizeof(uint32_t)+sizeof(uint32_t))) = 111; //seq_num of the 1st missing segment
-        *((uint32_t *)(RS_body + sizeof(uint32_t)+2*sizeof(uint32_t))) = 222; //seq_num of the 2nd missing segment
-        size_t RS_body_len = sizeof(uint32_t)*(2*sizeof(uint32_t)+ *((uint32_t *)(RS_body + sizeof(uint32_t))));
+        uint32_t num_missing_segment = 2; // the number of missing segments
+        uint32_t RS_body[(2 + num_missing_segment)];
+        RS_body[0] = 10; // segment size
+        RS_body[1] = num_missing_segment; // number of missing segments
+        RS_body[2] = 111; // seq_num of the 1st missing segment
+        RS_body[3] = 222; // seq_num of the 2nd missing segment
+
+        size_t RS_body_len = sizeof(uint32_t)*(2 + num_missing_segment);
         size_t RS_pac_len = createPacket(&RS_pac, &RS_header, RS_body, RS_body_len);
         //send AC packet to server
         sendto(sock, RS_pac, RS_pac_len, 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
@@ -72,6 +74,16 @@ int main(int argc, char *argv[])
     else if(strcmp(argv[3], "-u") == 0) {
         if(connection_upload_client(sock, &serv_adr, filename, &filesize) != 0)
             error_handling("rejected by receiver");
+
+        /* akh_disconn_response disconn_response; */
+        /* disconn_response.segment_list = NULL; */
+
+        /* while(disconnection_sender2(serv_sock, &clnt_adr, &clnt_adr_sz, &disconn_response) != 0) { */
+        /*     send_file(); */
+        /* } */
+        
+        /* send_file(); */
+        /* disconnection_sender2(sock, &serv_adr, &serv_adr_sz, &disconn_response); */
 
         send_file();
         //request disconnection and check if we need to retransmit missing segment
