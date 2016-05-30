@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
     char *filename = argv[4];
     int sock;
     struct sockaddr_in serv_adr;
+    socklen_t serv_adr_sz;
     off_t filesize;
 
     memset(&serv_adr, 0, sizeof(serv_adr));
@@ -42,48 +43,22 @@ int main(int argc, char *argv[])
     	    error_handling("sender does not have the file");
         }
 
-        recieve_file();
-//        //disconnection_reciever();
-//        /* This is a test for disconnection_sender() function: (1) AC */
-//        //create AC packet
-//        akh_pdu_header AC_header = createHeader(AC,randNum());
-//        packet AC_pac;
-//        size_t AC_pac_len = createPacket(&AC_pac, &AC_header, NULL, 0);
-//        //send AC packet to server
-//        sendto(sock, AC_pac, AC_pac_len, 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
-//        deletePacket(AC_pac);
-        /* This is a test for disconnection_sender() function: (2) RS */
-
-        //create AC packet
-        akh_pdu_header RS_header = createHeader(RS,randNum());
-        packet RS_pac;
-        uint32_t num_missing_segment = 2; // the number of missing segments
-        uint32_t RS_body[(2 + num_missing_segment)];
-        RS_body[0] = 10; // segment size
-        RS_body[1] = num_missing_segment; // number of missing segments
-        RS_body[2] = 111; // seq_num of the 1st missing segment
-        RS_body[3] = 222; // seq_num of the 2nd missing segment
-
-        size_t RS_body_len = sizeof(uint32_t)*(2 + num_missing_segment);
-        size_t RS_pac_len = createPacket(&RS_pac, &RS_header, RS_body, RS_body_len);
-        //send AC packet to server
-        sendto(sock, RS_pac, RS_pac_len, 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
-        deletePacket(RS_pac);
+        int test = 0;
+        while(handle_request_close(sock, &serv_adr, filename, filesize, test) != 0) {
+            int msg_type = test_receive_file(sock, &serv_adr, &serv_adr_sz);
+            test = 1;
+            /* if(msg_type == -1) { // problem in connection */
+            /*     continue; */
+            /* } */
+            /* else if(msg_type == RC) { // recieve request close */
+            /*     continue; */
+            /* } */
+        }
     }
 
     else if(strcmp(argv[3], "-u") == 0) {
         if(connection_upload_client(sock, &serv_adr, filename, &filesize) != 0)
             error_handling("rejected by receiver");
-
-        /* akh_disconn_response disconn_response; */
-        /* disconn_response.segment_list = NULL; */
-
-        /* while(disconnection_sender2(serv_sock, &clnt_adr, &clnt_adr_sz, &disconn_response) != 0) { */
-        /*     send_file(); */
-        /* } */
-        
-        /* send_file(); */
-        /* disconnection_sender2(sock, &serv_adr, &serv_adr_sz, &disconn_response); */
 
         send_file();
         //request disconnection and check if we need to retransmit missing segment
@@ -93,6 +68,5 @@ int main(int argc, char *argv[])
     close(sock);
 
     return 0;
-
 }
 

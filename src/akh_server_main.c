@@ -57,13 +57,14 @@ int main(int argc, char *argv[])
         akh_disconn_response disconn_response;
         disconn_response.segment_list = NULL;
 
-        /* while(disconnection_sender2(serv_sock, &clnt_adr, &clnt_adr_sz, &disconn_response) != 0) { */
-        /*     send_file(); */
-        /* } */
+        while(wait_disconnection(serv_sock, &clnt_adr, &clnt_adr_sz, &disconn_response) != 0) {
+            send_file();
+            request_close(serv_sock, &clnt_adr);
+        }
         
         
-        send_file();
-        disconnection_sender2(serv_sock, &clnt_adr, &clnt_adr_sz, &disconn_response);
+        /* send_file(); */
+        /* wait_disconnection(serv_sock, &clnt_adr, &clnt_adr_sz, &disconn_response); */
 
         /* //request disconnection and check if we need to retransmit missing segment */
         /* akh_disconn_response disconn_response = disconnection_sender(&serv_sock,&clnt_adr); */

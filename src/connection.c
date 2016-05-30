@@ -68,6 +68,7 @@ off_t connection_download_client(int sock, struct sockaddr_in *serv_adr, char *f
     char response[MAX_BUFFER_SIZE];
 
     // recieve package from server
+    adr_sz = sizeof(struct sockaddr_in);
     response_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&from_adr, &adr_sz, TIMEOUT, NUM_TRY);
 
     /* // send RD package to server and waiting for server's response */
@@ -138,6 +139,7 @@ int connection_upload_client(int sock, struct sockaddr_in *serv_adr, char *filen
     char response[MAX_BUFFER_SIZE];
 
     // recieve package from server
+    adr_sz = sizeof(struct sockaddr_in);
     response_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&from_adr, &adr_sz, TIMEOUT, NUM_TRY);
 
     if(response_len == -1)
