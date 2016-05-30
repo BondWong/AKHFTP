@@ -38,10 +38,8 @@ int main(int argc, char *argv[])
     }
 
     if(strcmp(argv[3], "-d") == 0) {
-        printf("< download request >\n");
-
         if( (filesize = connection_download_client(sock, &serv_adr, filename)) == 0) {
-    	    error_handling("fail connection error");
+    	    error_handling("sender does not have the file");
         }
 
         recieve_file();
@@ -72,9 +70,9 @@ int main(int argc, char *argv[])
     }
 
     else if(strcmp(argv[3], "-u") == 0) {
-        printf("< upload request >\n");
+        if(connection_upload_client(sock, &serv_adr, filename, &filesize) != 0)
+            error_handling("rejected by receiver");
 
-        connection_upload_client();
         send_file();
         //request disconnection and check if we need to retransmit missing segment
         akh_disconn_response disconn_response = disconnection_sender(&sock, &serv_adr);

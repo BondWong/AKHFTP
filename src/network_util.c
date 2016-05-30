@@ -29,7 +29,7 @@ ssize_t timer_recvfrom(int sock, void *buff, size_t nbytes, int flags, struct so
             puts("select() error");
             break;
         }
-        else if(result == -1) {
+        else if(result == 0) {
             puts("Time-out");
         }
         else {

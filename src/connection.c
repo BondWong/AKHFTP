@@ -34,7 +34,11 @@ uint16_t handle_request(int serv_sock, struct sockaddr_in *clnt_adr, socklen_t *
 
     strcpy(filename, requested_file);
 
-    printf("requested packet info\n");
+    if(msg_type == RD)
+        puts("< requested download >");
+    else if(msg_type == RU)
+        puts("< requested upload >");
+
     displayHeader(*(akh_pdu_header *)pac);
     printf("filename: %s\n", filename);
     printf("filesize: %d\n", *filesize);
@@ -42,7 +46,9 @@ uint16_t handle_request(int serv_sock, struct sockaddr_in *clnt_adr, socklen_t *
     return msg_type;
 }
 
+
 // when client makes connection with server for download
+// when accepted, return filesize. Otherwise return 0
 off_t connection_download_client(int sock, struct sockaddr_in *serv_adr, char *filename)
 {
     // create RD package
@@ -58,27 +64,29 @@ off_t connection_download_client(int sock, struct sockaddr_in *serv_adr, char *f
 
     socklen_t adr_sz;
     struct sockaddr_in from_adr;
-    unsigned int str_len;
+    ssize_t response_len;
     char response[MAX_BUFFER_SIZE];
 
     // recieve package from server
-    str_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&from_adr, &adr_sz, 3, 3);
+    response_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&from_adr, &adr_sz, TIMEOUT, NUM_TRY);
 
     /* // send RD package to server and waiting for server's response */
     /* akh_send(sock, pac, pac_len, 0, 0, (struct sockaddr *)serv_adr, (struct sockaddr *)&from_adr, &adr_sz, response, MAX_RESPONSE_SIZE); */
 
-    if(((akh_pdu_header *)response)->msg_type != AD) {
-        printf("rejected by server\n");
-        return 0;
-    }
+    if(response_len == -1)
+    	error_handling("fail connection error");
+    else if(((akh_pdu_header *)response)->msg_type != AD)
+    	error_handling("request rejected by server");
 
     off_t filesize = *(off_t *)( (akh_pdu_header *)response + 1 );
 
-    printf("request pac\n");
+    puts("< download request >");
+
+    puts("- send pac -");
     displayHeader(header);
     printf("filename: %s\n", body);
 
-    printf("\nresponse pac\n");
+    puts("- receive pac -");
     displayHeader(*(akh_pdu_header *)response);
     printf("file size %d\n", filesize);
 
@@ -87,36 +95,78 @@ off_t connection_download_client(int sock, struct sockaddr_in *serv_adr, char *f
 
 
 // when client requests download, server uses the function to make connection
-void connection_download_server(int *serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz, char *filename, off_t *filesize)
+void connection_download_server(int serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz, char *filename, off_t *filesize)
 {
-    printf("filename: %s\n", filename);
     akh_pdu_header header = createHeader(AD, randNum());
     *filesize = get_file_size(filename);
     packet response;
     size_t response_len = createPacket(&response, &header, (akh_pdu_body)filesize, sizeof(off_t));
 
-    sendto(*serv_sock, response, response_len, 0, (struct sockaddr *)clnt_adr, *clnt_adr_sz);
+    sendto(serv_sock, response, response_len, 0, (struct sockaddr *)clnt_adr, *clnt_adr_sz);
     deletePacket(response);
 
-
-    printf("server: receive download request\n");
-    printf("filename: %s\n", filename);
+    puts("< accept download >");
+    displayHeader(header);
     printf("filesize: %d\n", *filesize);
 }
 
 
 // when client makes connection with server for upload
-int connection_upload_client()
+// when accepted, return 0. Otherwise return -1
+int connection_upload_client(int sock, struct sockaddr_in *serv_adr, char *filename, off_t *filesize)
 {
-    printf("client: request upload\n");
+    *filesize = get_file_size(filename);
+    size_t body_len = sizeof(off_t) + strlen(filename);
+
+    // create RU package
+    akh_pdu_header header = createHeader(RU, randNum());
+    akh_pdu_body body = (akh_pdu_body)malloc(body_len);
+    memcpy(body, filesize, sizeof(off_t));
+    strcpy(body + sizeof(off_t), filename);
+
+    packet pac;
+    size_t pac_len = createPacket(&pac, &header, body, body_len);
+
+    // send RD package to server
+    sendto(sock, pac, pac_len, 0, (struct sockaddr *)serv_adr, sizeof(*serv_adr));
+    free(body);
+    deletePacket(pac);
+
+    socklen_t adr_sz;
+    struct sockaddr_in from_adr;
+    ssize_t response_len;
+    char response[MAX_BUFFER_SIZE];
+
+    // recieve package from server
+    response_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&from_adr, &adr_sz, TIMEOUT, NUM_TRY);
+
+    if(response_len == -1)
+    	error_handling("fail connection error");
+    else if(((akh_pdu_header *)response)->msg_type != AU)
+    	error_handling("request rejected by server");
+
+    puts("< upload request >");
+    puts("- send pac -");
+    displayHeader(header);
+    printf("filesize: %d\n", *filesize);
+    printf("filename: %s\n", filename);
+    puts("- receive pac -");
+    displayHeader(*(akh_pdu_header *)response);
+
     return 0;
 }
 
 // when client requests upload, server uses the function to make connection
-int connection_upload_server()
+void connection_upload_server(int serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz)
 {
-    printf("server: receive upload request\n");
-    return 0;
-}
+    akh_pdu_header header = createHeader(AU, randNum());
+    packet response;
+    size_t response_len = createPacket(&response, &header, NULL, 0);
 
+    sendto(serv_sock, response, response_len, 0, (struct sockaddr *)clnt_adr, *clnt_adr_sz);
+    deletePacket(response);
+
+    puts("< accept upload >");
+    displayHeader(header);
+}
 

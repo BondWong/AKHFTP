@@ -7,6 +7,9 @@
 
 #include "message.h"
 
+#define NUM_TRY 3
+#define TIMEOUT 3
+
 ssize_t timer_recvfrom(int sock, void *buff, size_t nbytes, int flags, struct sockaddr *from, socklen_t *addrlen, long sec, int num_try);
 
 void akh_send(int* sock, packet pac, size_t pac_len, int send_options, int rece_options, 

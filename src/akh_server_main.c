@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -24,18 +25,21 @@ int main(int argc, char *argv[])
 
     char filename[MAX_FILENAME_SIZE];
     off_t filesize;
-    int serv_sock;
+    int serv_sock, option;
     struct sockaddr_in serv_adr, clnt_adr;
     char pac[MAX_BUFFER_SIZE];
-    socklen_t clnt_adr_sz;
+    socklen_t clnt_adr_sz, optlen;
+
     // create server socket
     serv_sock = socket(PF_INET, SOCK_DGRAM, 0);
     if(serv_sock == -1)
         error_handling("UDP socket creation error");
+
     // set socket so that port can be reuse immediately after closure
-    if (setsockopt(serv_sock, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) == -1 ){
-	error_handling("Setting socket option to enable reusable port error");	
-    }
+    option = true;
+    optlen = sizeof(option);
+    if (setsockopt(serv_sock, SOL_SOCKET, SO_REUSEADDR, &option, optlen) == -1 )
+	    error_handling("Setting socket option to enable reusable port error");
 
     memset(&serv_adr, 0, sizeof(serv_adr));
     serv_adr.sin_family = AF_INET;
@@ -48,10 +52,10 @@ int main(int argc, char *argv[])
     int request_type = handle_request(serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
 
     if(request_type == RD) {
-        printf("< download request >\n");
+        connection_download_server(serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
 
-        connection_download_server(&serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
         send_file();
+
         //request disconnection and check if we need to retransmit missing segment
         akh_disconn_response disconn_response = disconnection_sender(&serv_sock,&clnt_adr);
         if (disconn_response.response_type == AC){
@@ -70,9 +74,8 @@ int main(int argc, char *argv[])
         }
     }
     else if(request_type == RU) {
-        printf("< upload request >\n");
+        connection_upload_server(serv_sock, &clnt_adr, &clnt_adr_sz);
 
-        connection_upload_server();
         recieve_file();
         disconnection_reciever();
     }

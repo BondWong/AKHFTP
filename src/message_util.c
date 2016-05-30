@@ -27,7 +27,8 @@ size_t createPacket(packet *pac, akh_pdu_header *header, akh_pdu_body body, size
         return 0;
 
     memcpy(*pac, header, sizeof(akh_pdu_header));
-    memcpy(*pac + sizeof(akh_pdu_header), body, body_len);
+    if(body != NULL)
+        memcpy(*pac + sizeof(akh_pdu_header), body, body_len);
     return sizeof(akh_pdu_header) + body_len;
 }
 
