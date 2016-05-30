@@ -26,29 +26,30 @@ IP = 127.0.0.1
 PORT = 9190
 DOWNLOAD = -d
 UPLOAD = -u
-FILENAME = test.txt
+UFILENAME = client.txt
+DFILENAME = server.txt
 
 
 compile: $(FILES) 
 	$(CC) $(CFLAGS) $(LDFLAGS) $(FILES)
 
 server: $(OBJ) $(AKH_SERVER_MAIN).o
-	$(CC) $(CLIENT_O) $(OBJ) $(AKH_SERVER_MAIN).o -o $(SERVER) $(LDFLAGS)
+	$(CC) $(CLIENT_O) $(OBJ) $(AKH_SERVER_MAIN).o -o ./server_dir/$(SERVER) $(LDFLAGS)
 
 client: $(OBJ) $(AKH_CLIENT_MAIN).o
-	$(CC) $(CLIENT_O) $(OBJ) $(AKH_CLIENT_MAIN).o -o $(CLIENT) $(LDFLAGS)
+	$(CC) $(CLIENT_O) $(OBJ) $(AKH_CLIENT_MAIN).o -o ./client_dir/$(CLIENT) $(LDFLAGS)
 
 run_server: $(SERVER)
-	./$(SERVER) $(PORT)
+	cd ./server_dir && ./$(SERVER) $(PORT)
 
 run_client_download: $(CLIENT)
-	./$(CLIENT) $(IP) $(PORT) $(DOWNLOAD) $(FILENAME)
+	cd ./client_dir && ./$(CLIENT) $(IP) $(PORT) $(DOWNLOAD) $(DFILENAME)
 
 run_client_upload: $(CLIENT)
-	./$(CLIENT) $(IP) $(PORT) $(UPLOAD) $(FILENAME)
+	cd ./client_dir && ./$(CLIENT) $(IP) $(PORT) $(UPLOAD) $(UFILENAME)
 
 clean:
 	rm -rf *.o
 	rm -rf *.gch
-	rm -rf $(SERVER) $(CLIENT)
+	rm -rf ./server_dir/$(SERVER) ./client_dir/$(CLIENT)
 

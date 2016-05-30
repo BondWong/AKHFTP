@@ -5,18 +5,10 @@
 
 #include "message.h"
 
-// reciever uses to disconnect
-int disconnection_reciever();
-
-// sender uses to disconnect
-akh_disconn_response disconnection_sender(int *sock, struct sockaddr_in *dst_addr);
-
-int test_receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz);
-
 // check file status
 // if finish downloading, accept close
 // otherwise, request segment
-int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename, off_t filesize, int test);
+int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename, off_t filesize, uint32_t seg_size, int test);
 
 // sender requests close after sending all segment
 void request_close(int sock, struct sockaddr_in *recv_adr);

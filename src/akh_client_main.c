@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
         }
 
         int test = 0;
-        while(handle_request_close(sock, &serv_adr, filename, filesize, test) != 0) {
+        while(handle_request_close(sock, &serv_adr, filename, filesize, 10, test) != 0) {
             int msg_type = test_receive_file(sock, &serv_adr, &serv_adr_sz);
             test = 1;
             /* if(msg_type == -1) { // problem in connection */
@@ -60,9 +60,17 @@ int main(int argc, char *argv[])
         if(connection_upload_client(sock, &serv_adr, filename, &filesize) != 0)
             error_handling("rejected by receiver");
 
-        send_file();
+        akh_disconn_response disconn_response;
+        disconn_response.segment_list = NULL;
+
+        while(wait_disconnection(sock, &serv_adr, &serv_adr_sz, &disconn_response) != 0) {
+            send_file();
+            request_close(sock, &serv_adr);
+        }
+
+        /* send_file(); */
         //request disconnection and check if we need to retransmit missing segment
-        akh_disconn_response disconn_response = disconnection_sender(&sock, &serv_adr);
+        /* akh_disconn_response disconn_response = disconnection_sender(&sock, &serv_adr); */
     }
 
     close(sock);

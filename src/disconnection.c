@@ -5,121 +5,26 @@
 #include "error_handling.h"
 #include "message.h"
 #include "message_util.h"
+#include "file_util.h"
 #include "disconnection.h"
 #include "security_util.h"
 #include "network_util.h"
 
 
-// reciever uses to disconnect
-int disconnection_reciever()
-{
-    printf("disconnection from reciever\n");
-    return 0;
-}
-
-// sender uses to disconnect
-akh_disconn_response disconnection_sender(int *sock, struct sockaddr_in *dst_addr)
-{
-    //create RC packet
-    akh_pdu_header header = createHeader(RC, randNum());
-    packet pac;
-    size_t pac_len = createPacket(&pac, &header, NULL, 0);
-    //send RC packet to server
-    sendto(*sock, pac, pac_len, 0, (struct sockaddr *) dst_addr, sizeof(*dst_addr));
-    deletePacket(pac);
-    printf("disconnection from sender\n");
-    
-    // create a buff for response
-    char response[MAX_BUFFER_SIZE];
-    //receive packet from destination
-    int str_len;
-    socklen_t dst_addr_sz = sizeof(struct sockaddr_in);
-    str_len = recvfrom(*sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&dst_addr, &dst_addr_sz);
-    uint16_t msg_type = ((akh_pdu_header *)response)->msg_type;
-    uint32_t seq_num = ((akh_pdu_header *)response)->seq_num; // get the sequence number of the missing segment
-    // if receipient is not ready to close, i.e. there is missing segments
-    if (msg_type == RS) {
-        printf("Closure rejected. There are some missing segments!\n");
-        akh_disconn_response disconn_response;
-        disconn_response.response_type = msg_type;
-        disconn_response.segment_size = *((uint32_t *)(response + sizeof(akh_pdu_header)));
-        disconn_response.segment_num = *((uint32_t *)(response + sizeof(akh_pdu_header)+ sizeof(uint32_t)));
-        disconn_response.segment_list = (char *)malloc(disconn_response.segment_num * sizeof(uint32_t));
-        memcpy(disconn_response.segment_list, (char *)(response + sizeof(akh_pdu_header) + sizeof(uint32_t) + sizeof(uint32_t)), disconn_response.segment_num * sizeof(uint32_t));
-        return disconn_response;
-        // do not free memory here; after we finish using the segment_list, the memory can be freed.
-    }
-    else if (msg_type == AC ){
-        printf("Accept closure of connection!\n");
-        akh_disconn_response disconn_response;
-        disconn_response.response_type = msg_type;
-        return disconn_response;
-    }
-    else // if receive types other than AC or RS, then something is wrong
-    {
-        printf("Closure rejected with unknow reason\n");
-        akh_disconn_response disconn_response;
-        disconn_response.response_type = msg_type;
-        return disconn_response;
-    }
-}
-
-
-int test_receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz)
-{
-    char response[MAX_BUFFER_SIZE];
-    ssize_t response_len;
-    do {
-        response_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)send_adr, send_adr_sz, TIMEOUT, NUM_TRY);
-
-        // time-out
-        if(response_len == -1)
-            return -1;
-
-        puts("< test receive file >");
-        displayHeader(*(akh_pdu_header *)response);
-    } while(((akh_pdu_header *)response)->msg_type == SS);
-
-    return ((akh_pdu_header *)response)->msg_type;
-}
-
-
 // check file status
 // if finish downloading, accept close and return 0
 // otherwise, request segment and return -1
-int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename, off_t filesize, int test)
+int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename, off_t filesize, uint32_t seg_size, int test)
 {
-    if(test == 0) {
-        akh_pdu_header RS_header = createHeader(RS,randNum());
-        packet RS_pac;
-        uint32_t num_missing_segment = 2; // the number of missing segments
-        uint32_t RS_body[(2 + num_missing_segment)];
-        RS_body[0] = 10; // segment size
-        RS_body[1] = num_missing_segment; // number of missing segments
-        RS_body[2] = 111; // seq_num of the 1st missing segment
-        RS_body[3] = 222; // seq_num of the 2nd missing segment
+    off_t current_filesize = get_file_size(filename);
 
-        size_t RS_body_len = sizeof(uint32_t)*(2 + num_missing_segment);
-        size_t RS_pac_len = createPacket(&RS_pac, &RS_header, RS_body, RS_body_len);
-        //send AC packet to server
-        sendto(sock, RS_pac, RS_pac_len, 0, (struct sockaddr *)send_adr, sizeof(*send_adr));
-        deletePacket(RS_pac);
-
-        puts("< send request segments>");
-        displayHeader(RS_header);
-        printf("segment size => %d\n", RS_body[0]);
-        printf("num missing segment => %d\n", RS_body[1]);
-        int i;
-        for(i = 0; i < num_missing_segment; i++)
-            printf("segment[%d] => %d\n", i, RS_body[2+i]);
-     
-        return -1;
-    }
-    else if(test == 1) {
+    // finish download, accept close
+    if(filesize == current_filesize) {
         akh_pdu_header header = createHeader(AC,randNum());
         packet pac;
         size_t pac_len = createPacket(&pac, &header, NULL, 0);
-        //send AC packet to server
+
+        //send AC packet to sender
         sendto(sock, pac, pac_len, 0, (struct sockaddr *)send_adr, sizeof(*send_adr));
         deletePacket(pac);
 
@@ -127,6 +32,39 @@ int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename
         displayHeader(header);
 
         return 0;
+    }
+    // not finish download, request segment
+    else {
+        uint32_t curr_segment_num = (current_filesize % seg_size != 0) ? 1 + current_filesize / seg_size : current_filesize / seg_size;
+        uint32_t last_segment_num = (filesize % seg_size != 0) ? 1 + filesize / seg_size : filesize / seg_size;
+        uint32_t num_missing_segment = last_segment_num - curr_segment_num; // the number of missing segments
+        
+        akh_pdu_header header = createHeader(RS, randNum());
+        packet pac;
+        uint32_t body[2 + num_missing_segment];
+        body[0] = seg_size; // segment size
+        body[1] = num_missing_segment; // number of missing segments
+
+        int i;
+        for(i = curr_segment_num; i < last_segment_num; i++) {
+            body[i - curr_segment_num + 2] = i + 1;
+        }
+
+        size_t body_len = sizeof(body);
+        size_t pac_len = createPacket(&pac, &header, body, body_len);
+
+        //send AC packet to server
+        sendto(sock, pac, pac_len, 0, (struct sockaddr *)send_adr, sizeof(*send_adr));
+        deletePacket(pac);
+
+        puts("< send request segments>");
+        displayHeader(header);
+        printf("segment size => %d\n", body[0]);
+        printf("num missing segment => %d\n", body[1]);
+        for(i = 0; i < num_missing_segment; i++)
+            printf("segment[%d] => %d\n", i, body[2+i]);
+
+        return -1;
     }
 }
 
