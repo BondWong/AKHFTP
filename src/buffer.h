@@ -15,7 +15,7 @@ struct node
 struct buffer
 {
     struct node *root;
-    unsigned long available;
+    unsigned long availability;
     int size;
     packet* pac_array;
 };

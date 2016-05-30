@@ -9,7 +9,7 @@
 
 void destroy_tree(buf_tree_node root);
 uint32_t get_seqnum(packet pac);
-void insert(packet pac, buf_tree_node *root);
+int insert(packet pac, buf_tree_node* root);
 void inorder_tree_walk(buf_tree_node root, packet* pac_array, int* index);
 
 akh_buffer create_buff();
