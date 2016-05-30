@@ -37,3 +37,7 @@ void deletePacket(packet pac)
     free(pac);
 }
 
+// stub function, return 2kb
+unsigned long get_pac_max() {
+    return 2 * 1024;
+}
