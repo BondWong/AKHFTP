@@ -43,10 +43,9 @@ int main(int argc, char *argv[])
     	    error_handling("sender does not have the file");
         }
 
-        int test = 0;
-        while(handle_request_close(sock, &serv_adr, filename, filesize, 10, test) != 0) {
-            int msg_type = test_receive_file(sock, &serv_adr, &serv_adr_sz);
-            test = 1;
+        while(handle_request_close(sock, &serv_adr, filename, filesize, 10) != 0) {
+            /* int msg_type = test_receive_file(sock, &serv_adr, &serv_adr_sz); */
+            int msg_type = receive_file(sock, &serv_adr, &serv_adr_sz, filename);
             /* if(msg_type == -1) { // problem in connection */
             /*     continue; */
             /* } */

@@ -19,8 +19,8 @@ int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename
     off_t current_filesize = get_file_size(filename);
 
     // finish download, accept close
-    if(filesize == current_filesize) {
-        akh_pdu_header header = createHeader(AC,randNum());
+    if(filesize <= current_filesize) {
+        akh_pdu_header header = createHeader(AC, randNum());
         packet pac;
         size_t pac_len = createPacket(&pac, &header, NULL, 0);
 
@@ -47,7 +47,7 @@ int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename
 
         int i;
         for(i = curr_segment_num; i < last_segment_num; i++) {
-            body[i - curr_segment_num + 2] = i + 1;
+            body[i - curr_segment_num + 2] = i;
         }
 
         size_t body_len = sizeof(body);

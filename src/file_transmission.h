@@ -19,7 +19,7 @@ int test_receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_ad
 int recieve_file();
 
 // sender uses the function
-int send_file();
+int send_file(int sock, struct sockaddr_in *recv_adr, char *filename, akh_disconn_response disconn_response);
 
 #endif
 
