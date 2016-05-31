@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     	    error_handling("sender does not have the file");
         }
 
-        while(handle_request_close(sock, &serv_adr, filename, filesize, 10) != 0) {
+        while(handle_request_close(sock, &serv_adr, filename, filesize, 1024) != 0) {
             /* int msg_type = test_receive_file(sock, &serv_adr, &serv_adr_sz); */
             int msg_type = receive_file(sock, &serv_adr, &serv_adr_sz, filename);
             /* if(msg_type == -1) { // problem in connection */
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         disconn_response.segment_list = NULL;
 
         while(wait_disconnection(sock, &serv_adr, &serv_adr_sz, &disconn_response) != 0) {
-            send_file();
+            send_file(sock, &serv_adr, filename, &disconn_response);
             request_close(sock, &serv_adr);
         }
 

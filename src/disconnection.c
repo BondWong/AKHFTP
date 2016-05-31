@@ -14,7 +14,7 @@
 // check file status
 // if finish downloading, accept close and return 0
 // otherwise, request segment and return -1
-int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename, off_t filesize, uint32_t seg_size, int test)
+int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename, off_t filesize, uint32_t seg_size)
 {
     off_t current_filesize = get_file_size(filename);
 
@@ -64,6 +64,7 @@ int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename
         for(i = 0; i < num_missing_segment; i++)
             printf("segment[%d] => %d\n", i, body[2+i]);
 
+        sleep(2);
         return -1;
     }
 }

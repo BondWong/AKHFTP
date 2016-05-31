@@ -8,7 +8,7 @@
 // check file status
 // if finish downloading, accept close
 // otherwise, request segment
-int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename, off_t filesize, uint32_t seg_size, int test);
+int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename, off_t filesize, uint32_t seg_size);
 
 // sender requests close after sending all segment
 void request_close(int sock, struct sockaddr_in *recv_adr);
