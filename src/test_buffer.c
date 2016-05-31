@@ -7,103 +7,79 @@
 #include "buffer_util.h"
 
 int main(void) {
-    // test insertion 
-    printf("test insertion\n");
-    akh_pdu_header header = {0, RD, 1234567, 0};
-    akh_pdu_body body = "test";
-    packet pac;
-    createPacket(&pac, &header, body, strlen(body));
-    printf("pac seqnum: %u\n", ((akh_pdu_header *) pac)->seq_num);
+	// test swap
+	printf("test swap\n");
+	packet* pac_array = (packet*) malloc(sizeof(packet) * 3);
+	int i;
+	for(i = 0; i < 3; i++) {
+		packet pac;
+		akh_pdu_header header = {0, RD, 1234567 + i, 0};
+		createPacket(&pac, &header, "test", strlen("test"));
+		pac_array[i] = pac;
+	}
+	printf("before swap\n");
+	printf("seq_num: %u\n", ((akh_pdu_header *)pac_array[0])->seq_num);
+	printf("seq_num: %u\n", ((akh_pdu_header *)pac_array[2])->seq_num);
+	swap(pac_array, 0, 2);
+	printf("after swap\n");
+	printf("seq_num: %u\n", ((akh_pdu_header *)pac_array[0])->seq_num);
+	printf("seq_num: %u\n", ((akh_pdu_header *)pac_array[2])->seq_num);
+	printf("==========\n\n");
+	
+	// test heapify
+	printf("test heapify");
+	printf("before heapify\n");
+	printf("seq_num: %u\n", get_seqnum(pac_array[0]));
+	heapify(pac_array, 0, 3);
+	printf("after heapify\n");
+	printf("seq_num: %u\n", get_seqnum(pac_array[0]));
+	printf("==========\n\n");
 
-    buf_tree_node root = NULL;
-    insert(pac, &root);
-    printf("tree pac seqnum: %u\n", ((akh_pdu_header *)root->pac)->seq_num);
-    printf("==========\n\n");
+	// test heapify_up
+	printf("test heapify_up\n");
+	swap(pac_array, 0, 2);
+	printf("before heapify_up");
+	printf("seq_num: %u\n", get_seqnum(pac_array[0]));
+	heapify_up(pac_array, 2, 3);
+	printf("after heapify_up");
+	printf("seq_num: %u\n", get_seqnum(pac_array[0]));
+	printf("==========\n\n");
 
-    // test get_seqnum
-    printf("test get_seqnum\n");
-    printf("pac seqnum: %u\n", ((akh_pdu_header *) pac)->seq_num);
-    printf("get_seqnum: %u\n", get_seqnum(pac));
-    printf("==========\n\n");
+	// test create_buffer
+	printf("test create_buffer\n");
+	buffer* b;
+	create_buffer(&b, 100);
+	printf("buffer capacity: %d\n", b->capacity);
+	printf("buffer count: %d\n", b->count);
+	printf("buffer pac_array: %d\n", b->pac_array == NULL);
+	printf("==========\n\n");
 
-    // test inorder tree walk
-    printf("test inorder tree walk\n");
-    int seqnum = 1234568;
-    int i = 0;
-    for(i = 0; i < 11; i++, seqnum++) {
-	    akh_pdu_header h = {0, RD, seqnum, 0};
-	    packet packet;
-	    createPacket(&packet, &h, body, strlen(body));
-	    insert(packet, &root);
-    } 
-    int index = 0;
-    packet* pac_array = (packet*)malloc(sizeof(packet) * 11);
-    inorder_tree_walk(root, pac_array, &index);
-    for(i = 0; i < 12; i++) {
-	    printf("pac seqnum: %u\n", ((akh_pdu_header *)pac_array[i])->seq_num);
-    }
-    printf("=========\n\n");
+	// test push and pop
+	printf("test push and pop\n");
+	for(i = 0; i < 3; i++) {
+		packet pac;
+		akh_pdu_header header = {0, RD, 1234567 - i, 0};
+		createPacket(&pac, &header, "test", strlen("test"));
+		push(b, pac);
+	}
+	printf("after push, heap size: %d\n", b->count);
+	for(i = 0; i < 3; i++) {
+		printf("seqnum: %u\n", get_seqnum(b->pac_array[i]));
+	}
 
-    // test destory tree
-    printf("test destroy tree\n");
-    destroy_tree(root);
-    printf("pac seqnum: %u\n", ((akh_pdu_header *)root->pac)->seq_num);
-    printf("=========\n\n");
+	packet pac;
+	printf("poping element\n");
+	for(i = 0; i < 3; i++) {
+		pop(b, &pac);
+		printf("seqnum: %u\n", get_seqnum(pac));
+	}
 
-    // test create buffer
-    printf("test create buffer\n");
-    akh_buffer buf = NULL;
-    buf = create_buff();
-    printf("is buf NULL: %d\n", buf == NULL);
-    printf("buffer size: %d\n", size(buf));
-    printf("buffer availability: %lu\n", buf->availability);
-    printf("buffer root: %d\n", buf->root == NULL);
-    printf("=========\n\n");
+	printf("==========\n\n");
 
-    // test push
-    printf("test push\n");
-    // when there are enough space
-    int result;
-    result = push(pac, buf);
-    printf("result is: %d\n", result);
-    printf("size is: %d\n", size(buf));
-
-    // when duplicate occrus
-    result = push(pac, buf);
-    printf("result is: %d\n", result);
-    printf("size is: %d\n", size(buf));
-
-    // when there are not enough space
-    unsigned long availability = buf->availability;
-    buf->availability = 0;
-    result = push(pac, buf);
-    printf("result is: %d\n", result);
-    printf("size is %d\n", size(buf));
-    buf->availability = availability;
-
-    // test get
-    printf("test get\n");
-    seqnum = 1234568;
-    for(i = 0; i < 11; i++, seqnum++) {
-	    akh_pdu_header h = {0, RD, seqnum, 0};
-	    packet packet;
-	    createPacket(&packet, &h, body, strlen(body));
-	    push(packet, buf);
-    } 
-    for(i = 0; i < size(buf); i++) {
-	    packet p = get(i, buf);
-	    printf("pac seqnum: %u\n", ((akh_pdu_header *)p)->seq_num);
-    }
-    printf("=========\n\n");
-
-    // test clear buff
-    clear_buff(buf);
-    printf("is buf NULL: %d\n", buf == NULL);
-    printf("buffer size: %d\n", size(buf));
-    printf("buffer availability: %lu\n", buf->availability);
-    printf("buffer pac_array: %d\n", buf->pac_array == NULL);
-    printf("buffer root: %d\n", buf->root == NULL);
-    printf("=========\n\n");
+	// test free_buffer
+	printf("test free_buffer");
+	free_buffer(&b);
+	printf("is buffer NULL: %d\n", b == NULL);
 
     return 0;
 }

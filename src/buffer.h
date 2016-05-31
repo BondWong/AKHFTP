@@ -3,24 +3,13 @@
 
 #include "message.h"
 
-// TO Do change binary tree to heap
-
-struct node
+struct heap 
 {
-    packet pac;
-    struct node *left;
-    struct node *right;
-};
-
-struct buffer
-{
-    struct node *root;
-    unsigned long availability;
-    int size;
     packet* pac_array;
+    unsigned int capacity;
+    unsigned int count;
 };
 
-typedef struct node * buf_tree_node;
-typedef struct buffer * akh_buffer;
+typedef struct heap buffer;
 
 #endif
