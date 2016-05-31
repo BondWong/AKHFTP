@@ -10,4 +10,3 @@ off_t get_file_size(char *filename)
     }
     return fileinfo.st_size;
 }
-
