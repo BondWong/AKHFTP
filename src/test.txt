@@ -1,0 +1,18 @@
+123456789
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
+int main()
+{
+    printf("hello world\n");
+    char filename[] = "akh_client_main.c";
+    struct stat buf;
+    int result = stat(filename, &buf);
+    off_t size = buf.st_size;
+    printf("file size %d\n", size);
+    printf("off_t size %d\n", sizeof(off_t));
+    printf("result %d\n", result);
+
+    return 0;
+}
