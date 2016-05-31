@@ -64,7 +64,6 @@ int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename
         for(i = 0; i < num_missing_segment; i++)
             printf("segment[%d] => %d\n", i, body[2+i]);
 
-        sleep(2);
         return -1;
     }
 }

@@ -59,7 +59,6 @@ int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz,
         printf("msg_type = %x\tseq_num = %d\n", pheader->msg_type, pheader->seq_num);
  
         
-        sleep(2);
     } while(((akh_pdu_header *)response)->msg_type == SS);
 
     return ((akh_pdu_header *)response)->msg_type;
@@ -90,7 +89,6 @@ int send_file(int sock, struct sockaddr_in *recv_adr, char *filename, akh_discon
 
         puts("< send file segment >");
         displayHeader(header);
-        sleep(2);
     }
     return 0;
 }
