@@ -58,17 +58,16 @@ int main(int argc, char *argv[])
         disconn_response.segment_list = NULL;
 
         while(wait_disconnection(serv_sock, &clnt_adr, &clnt_adr_sz, &disconn_response) != 0) {
-            send_file();
+            send_file(serv_sock, &clnt_adr, filename, &disconn_response);
             request_close(serv_sock, &clnt_adr);
         }
     }
     else if(request_type == RU) {
         connection_upload_server(serv_sock, &clnt_adr, &clnt_adr_sz);
 
-        int test = 0;
-        while(handle_request_close(serv_sock, &clnt_adr, filename, filesize, 10, test) != 0) {
-            int msg_type = test_receive_file(serv_sock, &clnt_adr, &clnt_adr_sz);
-            test = 1;
+        while(handle_request_close(serv_sock, &clnt_adr, filename, filesize, 10) != 0) {
+            /* int msg_type = test_receive_file(serv_sock, &clnt_adr, &clnt_adr_sz); */
+            int msg_type = receive_file(serv_sock, &clnt_adr, &clnt_adr_sz, filename);
             /* if(msg_type == -1) { // problem in connection */
             /*     continue; */
             /* } */

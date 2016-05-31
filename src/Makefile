@@ -53,6 +53,7 @@ clean:
 	rm -rf *.o
 	rm -rf *.gch
 	rm -rf ./server_dir/$(SERVER) ./client_dir/$(CLIENT)
+	rm -rf ./server_dir/client.txt ./client_dir/server.txt
 
 bond: compile
 	$(CC) $(CLIENT_O) $(OBJ) test_buffer.c -o test $(LDFLAGS)
