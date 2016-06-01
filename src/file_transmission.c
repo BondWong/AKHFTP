@@ -39,7 +39,7 @@ int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz,
             return -1;
         else if(pheader->msg_type == SS) {
             if(pheader->seq_num == curr_segment_num) {
-                write_segment(response, response_len - sizeof(akh_pdu_header), filename);
+                write_segment(response + sizeof(akh_pdu_header), response_len - sizeof(akh_pdu_header), filename);
                 curr_segment_num++;
             }
         }
