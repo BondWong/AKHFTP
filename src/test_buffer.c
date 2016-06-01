@@ -110,12 +110,14 @@ int main(void) {
 		elem->next =NULL;
 
 		put(m, elem->seqnum, elem);
-		int result = contains(m, elem);
 
 		map_elem e = NULL;
 		get(m, elem->seqnum, &e);
-		printf("contains: %d\n", result);
 		printf("seqnum: %u\n", e->seqnum);
+
+		remove_elem(m, elem->seqnum);
+		int result = contains(m, elem);
+		printf("contains: %d\n", result);
 	}
 	printf("==========\n\n");
 

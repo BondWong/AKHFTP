@@ -11,5 +11,6 @@ void free_map(map** m);
 int put(map* m, uint32_t key, map_elem element);
 int contains(map* m, map_elem element);
 void get(map* m, uint32_t key, map_elem* element);
+void remove_elem(map* m, uint32_t key);
 
 #endif

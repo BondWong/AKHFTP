@@ -115,6 +115,7 @@ int pop(buffer* h, packet* pac, ssize_t* pac_size) {
 
 	*pac = h->elements[0].pac;
 	*pac_size = h->elements[0].pac_size;
+	remove_elem(h->m, get_seqnum(h->elements[0].pac));
 
 	swap(h->elements, 0, h->count - 1);
 	h->count--;

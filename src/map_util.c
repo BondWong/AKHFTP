@@ -76,3 +76,20 @@ void get(map* m, uint32_t key, map_elem* element) {
 	(*element) = runner;
 		
 }
+
+void remove_elem(map* m, uint32_t key) {
+	uint32_t hash = hash_code(key, m->capacity);
+
+	map_elem runner = m->elements[hash];
+	map_elem marker = runner;
+	while(runner != NULL && runner->seqnum != key) {
+		marker = runner;
+		runner = runner->next;
+	}
+
+	if(runner != NULL) {
+		marker->next = runner->next;
+		free(runner);
+	}
+
+}
