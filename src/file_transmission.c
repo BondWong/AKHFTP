@@ -9,6 +9,10 @@
 #include "security_util.h"
 #include "network_util.h"
 #include "file_transmission.h"
+#include "buffer.h"
+#include "buffer_util.h"
+#include "map.h"
+#include "map_util.h"
 
 
 size_t write_segment(void *buf, size_t size, char *filename)
@@ -30,6 +34,9 @@ int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz,
 
     char response[MAX_BUFFER_SIZE];
     ssize_t response_len;
+    buffer *b;
+	create_buffer(&b, 1024);
+
     do {
         response_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)send_adr, send_adr_sz, TIMEOUT, NUM_TRY);
         akh_pdu_header *pheader = (akh_pdu_header *)response;
@@ -38,15 +45,32 @@ int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz,
         if(response_len == -1)
             return -1;
         else if(pheader->msg_type == SS) {
+            printf("SS seq_num => %d\n", pheader->seq_num);
             if(pheader->seq_num == curr_segment_num) {
                 write_segment(response + sizeof(akh_pdu_header), response_len - sizeof(akh_pdu_header), filename);
                 curr_segment_num++;
             }
+            else {
+		        push(b, response, response_len);
+            }
+            uint32_t temp;
+            do {
+                temp = curr_segment_num;
+                pop(b, response, &response_len);
+                pheader = (akh_pdu_header *)response;
+                if(pheader->seq_num == curr_segment_num) {
+                    write_segment(response + sizeof(akh_pdu_header), response_len - sizeof(akh_pdu_header), filename);
+                    curr_segment_num++;
+                }
+                push(b, response, response_len);
+            } while(pheader->seq_num == temp);
+
         }
 
         puts("< receive file segment >");
         printf("msg_type = %x\tseq_num = %d\n", pheader->msg_type, pheader->seq_num);
     } while(((akh_pdu_header *)response)->msg_type == SS);
+
 
     return ((akh_pdu_header *)response)->msg_type;
 }
