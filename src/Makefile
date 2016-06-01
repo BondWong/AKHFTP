@@ -58,6 +58,3 @@ clean:
 bond: compile
 	$(CC) $(CLIENT_O) $(OBJ) test_buffer.c -o test $(LDFLAGS)
 
-test: compile
-	$(CC) $(CLIENT_O) $(OBJ) test_main.c -o test_main $(LDFLAGS)
-
