@@ -43,16 +43,20 @@ int main(int argc, char *argv[])
     	    error_handling("sender does not have the file");
         }
 
-        while(handle_request_close(sock, &serv_adr, filename, filesize, 10) != 0) {
-            /* int msg_type = test_receive_file(sock, &serv_adr, &serv_adr_sz); */
-            int msg_type = receive_file(sock, &serv_adr, &serv_adr_sz, filename);
-            /* if(msg_type == -1) { // problem in connection */
-            /*     continue; */
-            /* } */
+        uint32_t body_size = 10; 
+        int num_time_out = 0;
+        while(num_time_out < 3 && handle_request_close(sock, &serv_adr, filename, filesize, body_size) != 0) {
+            int msg_type = receive_file(sock, &serv_adr, &serv_adr_sz, filename, body_size);
+            if(msg_type == -1) // problem in connection
+                num_time_out++;
+            else
+                num_time_out = 0;
             /* else if(msg_type == RC) { // recieve request close */
-            /*     continue; */
+            /*     num_time_out = 0; */
             /* } */
         }
+        if(num_time_out > 2)
+            error_handling("connection error");
     }
 
     else if(strcmp(argv[3], "-u") == 0) {
@@ -66,10 +70,6 @@ int main(int argc, char *argv[])
             send_file(sock, &serv_adr, filename, &disconn_response);
             request_close(sock, &serv_adr);
         }
-
-        /* send_file(); */
-        //request disconnection and check if we need to retransmit missing segment
-        /* akh_disconn_response disconn_response = disconnection_sender(&sock, &serv_adr); */
     }
 
     close(sock);
