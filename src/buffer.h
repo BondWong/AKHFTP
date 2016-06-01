@@ -3,9 +3,17 @@
 
 #include "message.h"
 
+struct heap_node
+{
+    packet pac;
+    ssize_t pac_size;
+};
+
+typedef struct heap_node buffer_element;
+
 struct heap 
 {
-    packet* pac_array;
+    struct heap_node* elements;
     unsigned int capacity;
     unsigned int count;
 };

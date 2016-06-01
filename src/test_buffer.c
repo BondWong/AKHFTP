@@ -9,40 +9,40 @@
 int main(void) {
 	// test swap
 	printf("test swap\n");
-	packet* pac_array = (packet*) malloc(sizeof(packet) * 3);
+	buffer_element* elements = (buffer_element*) malloc(sizeof(buffer_element) * 3);
 	int i;
 	for(i = 0; i < 3; i++) {
 		packet pac;
 		akh_pdu_header header = {0, RD, 1234567 + i, 0};
-		createPacket(&pac, &header, "test", strlen("test"));
-		pac_array[i] = pac;
+		elements[i].pac_size = createPacket(&pac, &header, "test", strlen("test"));
+		elements[i].pac = pac;
 	}
 	printf("before swap\n");
-	printf("seq_num: %u\n", ((akh_pdu_header *)pac_array[0])->seq_num);
-	printf("seq_num: %u\n", ((akh_pdu_header *)pac_array[2])->seq_num);
-	swap(pac_array, 0, 2);
+	printf("seq_num: %u\n", ((akh_pdu_header *)elements[0].pac)->seq_num);
+	printf("seq_num: %u\n", ((akh_pdu_header *)elements[2].pac)->seq_num);
+	swap(elements, 0, 2);
 	printf("after swap\n");
-	printf("seq_num: %u\n", ((akh_pdu_header *)pac_array[0])->seq_num);
-	printf("seq_num: %u\n", ((akh_pdu_header *)pac_array[2])->seq_num);
+	printf("seq_num: %u\n", ((akh_pdu_header *)elements[0].pac)->seq_num);
+	printf("seq_num: %u\n", ((akh_pdu_header *)elements[2].pac)->seq_num);
 	printf("==========\n\n");
 	
 	// test heapify
 	printf("test heapify");
 	printf("before heapify\n");
-	printf("seq_num: %u\n", get_seqnum(pac_array[0]));
-	heapify(pac_array, 0, 3);
+	printf("seq_num: %u\n", get_seqnum(elements[0].pac));
+	heapify(elements, 0, 3);
 	printf("after heapify\n");
-	printf("seq_num: %u\n", get_seqnum(pac_array[0]));
+	printf("seq_num: %u\n", get_seqnum(elements[0].pac));
 	printf("==========\n\n");
 
 	// test heapify_up
 	printf("test heapify_up\n");
-	swap(pac_array, 0, 2);
-	printf("before heapify_up");
-	printf("seq_num: %u\n", get_seqnum(pac_array[0]));
-	heapify_up(pac_array, 2, 3);
-	printf("after heapify_up");
-	printf("seq_num: %u\n", get_seqnum(pac_array[0]));
+	swap(elements, 0, 2);
+	printf("before heapify_up\n");
+	printf("seq_num: %u\n", get_seqnum(elements[0].pac));
+	heapify_up(elements, 2, 3);
+	printf("after heapify_up\n");
+	printf("seq_num: %u\n", get_seqnum(elements[0].pac));
 	printf("==========\n\n");
 
 	// test create_buffer
@@ -51,7 +51,7 @@ int main(void) {
 	create_buffer(&b, 100);
 	printf("buffer capacity: %d\n", b->capacity);
 	printf("buffer count: %d\n", b->count);
-	printf("buffer pac_array: %d\n", b->pac_array == NULL);
+	printf("buffer elements is NULL: %d\n", b->elements == NULL);
 	printf("==========\n\n");
 
 	// test push and pop
@@ -59,27 +59,30 @@ int main(void) {
 	for(i = 0; i < 3; i++) {
 		packet pac;
 		akh_pdu_header header = {0, RD, 1234567 - i, 0};
-		createPacket(&pac, &header, "test", strlen("test"));
-		push(b, pac);
+		ssize_t pac_size = createPacket(&pac, &header, "test", strlen("test"));
+		push(b, pac, pac_size);
 	}
 	printf("after push, heap size: %d\n", b->count);
 	for(i = 0; i < 3; i++) {
-		printf("seqnum: %u\n", get_seqnum(b->pac_array[i]));
+		printf("seqnum: %u\n", get_seqnum(b->elements[i].pac));
 	}
 
 	packet pac;
+	ssize_t pac_size;
 	printf("poping element\n");
 	for(i = 0; i < 3; i++) {
-		pop(b, &pac);
+		pop(b, &pac, &pac_size);
 		printf("seqnum: %u\n", get_seqnum(pac));
+		printf("pac_size: %zdc\n", pac_size);
 	}
 
 	printf("==========\n\n");
 
 	// test free_buffer
-	printf("test free_buffer");
+	printf("test free_buffer\n");
 	free_buffer(&b);
 	printf("is buffer NULL: %d\n", b == NULL);
+	printf("==========\n\n");
 
     return 0;
 }
