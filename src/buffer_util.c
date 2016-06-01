@@ -5,6 +5,7 @@
 #include "buffer.h"
 #include "buffer_util.h"
 #include "message_util.h"
+#include "map_util.h"
 
 #define CMP(a, b) (get_seqnum(a) < get_seqnum(b))
 
@@ -71,6 +72,7 @@ void create_buffer(buffer** h, unsigned int capacity) {
 	(*h)->capacity = capacity;
 	(*h)->count = 0;
 	(*h)->elements = elements;
+	(*h)->m = create_map(capacity);
 }
 
 void free_buffer(buffer** h) {
@@ -78,6 +80,7 @@ void free_buffer(buffer** h) {
 	(*h)->count = 0;
 	free((*h)->elements);
 	(*h)->elements = NULL;
+	free_map(&((*h)->m));
 	free((*h));
 	*h = NULL;
 }
@@ -87,6 +90,13 @@ int push(buffer* h, packet pac, ssize_t pac_size) {
 	if(h == NULL) return -1;
 	if(h->count == h->capacity) return 0;
 
+	map_elem elem = (map_elem) malloc(sizeof(map_elem));
+	elem->seqnum = get_seqnum(pac);
+	elem->next = NULL;
+
+	if(contains(h->m, elem) == 1) return 1;
+
+	put(h->m, elem->seqnum, elem);
 	buffer_element* element = (buffer_element*) malloc(sizeof(buffer_element));
 	element->pac = pac;
 	element->pac_size = pac_size;

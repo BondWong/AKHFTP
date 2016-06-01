@@ -2,6 +2,7 @@
 #define __BUFFER_H__
 
 #include "message.h"
+#include "map.h"
 
 struct heap_node
 {
@@ -14,6 +15,7 @@ typedef struct heap_node buffer_element;
 struct heap 
 {
     struct heap_node* elements;
+    map* m;
     unsigned int capacity;
     unsigned int count;
 };
