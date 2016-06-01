@@ -65,19 +65,18 @@ int main(int argc, char *argv[])
     else if(request_type == RU) {
         connection_upload_server(serv_sock, &clnt_adr, &clnt_adr_sz);
 
-        while(handle_request_close(serv_sock, &clnt_adr, filename, filesize, 10) != 0) {
-            /* int msg_type = test_receive_file(serv_sock, &clnt_adr, &clnt_adr_sz); */
-            int msg_type = receive_file(serv_sock, &clnt_adr, &clnt_adr_sz, filename);
-            /* if(msg_type == -1) { // problem in connection */
-            /*     continue; */
-            /* } */
-            /* else if(msg_type == RC) { // recieve request close */
-            /*     continue; */
-            /* } */
+        uint32_t body_size = 10; 
+        int num_time_out = 0;
+        while(num_time_out < 3 && handle_request_close(serv_sock, &clnt_adr, filename, filesize, 10) != 0) {
+            int msg_type = receive_file(serv_sock, &clnt_adr, &clnt_adr_sz, filename, body_size);
+            if(msg_type == -1) // problem in connection
+                num_time_out++;
+            else
+                num_time_out = 0;
+ 
         }
-
-        /* recieve_file(); */
-        /* disconnection_reciever(); */
+        if(num_time_out > 2)
+            error_handling("connection error");
     }
 
     close(serv_sock);

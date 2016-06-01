@@ -22,47 +22,35 @@ size_t read_segment(void *buf, size_t size, int seg_num, char *filename)
 }
 
 
-int test_receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz)
-{
-    char response[MAX_BUFFER_SIZE];
-    ssize_t response_len;
-    do {
-        response_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)send_adr, send_adr_sz, TIMEOUT, NUM_TRY);
-
-        // time-out
-        if(response_len == -1)
-            return -1;
-
-        puts("< test receive file >");
-        displayHeader(*(akh_pdu_header *)response);
-    } while(((akh_pdu_header *)response)->msg_type == SS);
-
-    return ((akh_pdu_header *)response)->msg_type;
-}
-
 // reciever uses the function
-int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz, char *filename)
+int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz, char *filename, uint32_t seg_size)
 {
+    off_t current_filesize = get_file_size(filename);
+    uint32_t curr_segment_num = (current_filesize % seg_size != 0) ? 1 + current_filesize / seg_size : current_filesize / seg_size;
+
     char response[MAX_BUFFER_SIZE];
     ssize_t response_len;
     do {
         response_len = timer_recvfrom(sock, response, MAX_BUFFER_SIZE, 0, (struct sockaddr *)send_adr, send_adr_sz, TIMEOUT, NUM_TRY);
+        akh_pdu_header *pheader = (akh_pdu_header *)response;
 
         // time-out
         if(response_len == -1)
             return -1;
-        else if(((akh_pdu_header *)response)->msg_type == SS)
-            write_segment(response, response_len - sizeof(akh_pdu_header), filename);
+        else if(pheader->msg_type == SS) {
+            if(pheader->seq_num == curr_segment_num) {
+                write_segment(response, response_len - sizeof(akh_pdu_header), filename);
+                curr_segment_num++;
+            }
+        }
 
-        akh_pdu_header *pheader = (akh_pdu_header *)response;
         puts("< receive file segment >");
         printf("msg_type = %x\tseq_num = %d\n", pheader->msg_type, pheader->seq_num);
- 
-        
     } while(((akh_pdu_header *)response)->msg_type == SS);
 
     return ((akh_pdu_header *)response)->msg_type;
 }
+
 
 // sender uses the function
 int send_file(int sock, struct sockaddr_in *recv_adr, char *filename, akh_disconn_response *disconn_response)
@@ -85,7 +73,6 @@ int send_file(int sock, struct sockaddr_in *recv_adr, char *filename, akh_discon
         pac_len = createPacket(&pac, &header, buf, buf_len);
         sendto(sock, pac, pac_len, 0, (struct sockaddr *)recv_adr, sizeof(*recv_adr));
         deletePacket(pac);
-
 
         puts("< send file segment >");
         displayHeader(header);
