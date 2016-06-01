@@ -1,16 +1,20 @@
 #ifndef __MAP_H__
 #define __MAP_H__
 
-struct seqnum_node
+struct node
 {
     uint32_t seqnum;
-    seqnum_node* next;
+    struct node* next;
 };
+
+typedef struct node* map_elem;
 
 struct map
 {
-    seqnum_node* seqnum_node_array;
+    map_elem* elements;
     unsigned int capacity;
 };
+
+typedef struct map map;
 
 #endif
