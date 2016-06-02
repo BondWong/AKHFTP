@@ -1,3 +1,8 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: Defines macros of message types, etc. Also defines structure for "PDU header" and "disconnection response"; PDU body, and packet pointer.
+ * * */
 #ifndef __MESSAGE_H__
 #define __MESSAGE_H__
 

@@ -51,12 +51,12 @@ int main(int argc, char *argv[])
     serv_adr.sin_family = AF_INET;
     serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
     serv_adr.sin_port = htons(atoi(argv[1]));
-
+    // bind assigns serv_adr to the socket serv_sock
     if(bind(serv_sock, (struct sockaddr *)&serv_adr, sizeof(serv_adr)) == -1)
         error_handling("bind() error");
-
+    // handle request
     int request_type = handle_request(serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
-
+    // Request download
     if(request_type == RD) {
         connection_download_server(serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
 
@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
             request_close(serv_sock, &clnt_adr);
         }
     }
+    // Request upload
     else if(request_type == RU) {
         connection_upload_server(serv_sock, &clnt_adr, &clnt_adr_sz);
 

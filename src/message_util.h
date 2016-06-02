@@ -1,3 +1,8 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: The header file for message_util.c
+ * * */
 #ifndef __MESSAGE_UTIL_H__
 #define __MESSAGE_UTIL_H__
 
