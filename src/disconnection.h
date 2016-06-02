@@ -1,3 +1,14 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: The header file of disconnection.c
+ *	    The two parties in the file transfer process are:
+ *	    file sender ----file----> file receiver
+ *	    This file declares functions for disconnecting the two paries.
+ *	    1. handle_request_close: function for the file receiver to handle request close (RC) message from the file sender
+ *	    2. request_close:  function that generates a RC message
+ *	    3. wait_disconnection: function for the file sender to handle the responses (AC or RS) to the RC message it sent 
+ * * */
 #ifndef __DISCONNECTION_H__
 #define __DISCONNECTION_H__
 

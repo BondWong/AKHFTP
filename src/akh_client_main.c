@@ -1,3 +1,8 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: This file contains the main function for a AKHFTP client.
+ * */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
