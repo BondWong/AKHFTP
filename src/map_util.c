@@ -40,8 +40,10 @@ void free_map(map** m) {
 
 int put(map* m, uint32_t key, map_elem element) {
 	uint32_t hash = hash_code(key, m->capacity);
+	printf("putting key %d, seqnum %d, hash %d\n", key, element->seqnum, hash);
 	
 	if(m->elements[hash] == NULL) {
+	    printf("type1\n");
 		m->elements[hash] = element;
 		return 1;
 	}
@@ -68,14 +70,14 @@ int contains(map* m, map_elem element) {
 
 void get(map* m, uint32_t key, map_elem* element) {
 	uint32_t hash = hash_code(key, m->capacity);
-	
+    printf("getting key: %d, hash %d...\n", key, hash);
+
 	map_elem runner = m->elements[hash];
 	while(runner != NULL && runner->seqnum != key ) {
+	    printf("runner seqnum: %d...\n", runner->seqnum);
 		runner = runner->next;
 	}
-
 	(*element) = runner;
-		
 }
 
 void remove_elem(map* m, uint32_t key) {

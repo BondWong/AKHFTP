@@ -1,13 +1,13 @@
 /* Class Name: CS544 Computer networks
- * Date: 6/2/2016
- * Group member: Jae Hoon Kim, Junking Huang, Ni An
- * Purpose: The two parties in the file transfer process are:
- *	    file sender ----file----> file receiver
- *	    This file contains functions for disconnecting the two paries.
- *	    1. handle_request_close: function for the file receiver to handle request close (RC) message from the file sender
- *	    2. request_close:  function that generates a RC message
- *	    3. wait_disconnection: function for the file sender to handle the responses (AC or RS) to the RC message it sent 
- * * */
+* Date: 6/2/2016
+* Group member: Jae Hoon Kim, Junking Huang, Ni An
+* Purpose: The two parties in the file transfer process are:
+*	    file sender ----file----> file receiver
+*	    This file contains functions for disconnecting the two paries.
+*	    1. handle_request_close: function for the file receiver to handle request close (RC) message from the file sender
+*	    2. request_close:  function that generates a RC message
+*	    3. wait_disconnection: function for the file sender to handle the responses (AC or RS) to the RC message it sent
+* * */
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -20,6 +20,7 @@
 #include "security_util.h"
 #include "network_util.h"
 
+#include "thread_util.h"
 
 // check file status
 // if finish downloading, accept close and return 0
@@ -61,18 +62,19 @@ int handle_request_close(int *sock, struct sockaddr_in *send_adr, char *filename
         }
 
         size_t body_len = sizeof(body);
-        size_t pac_len = createPacket(&pac, &header, body, body_len);
-
-        //send AC packet to server
+        size_t pac_len = createPacket(&pac, &header, body, body_len);     
+        
+        //send RS packet to server
         sendto(sock, pac, pac_len, 0, (struct sockaddr *)send_adr, sizeof(*send_adr));
         deletePacket(pac);
 
         puts("< send request segments>");
         displayHeader(header);
         printf("segment size => %d\n", body[0]);
-        printf("num missing segment => %d\n", body[1]);
+        printf("num missing segment => %d\n\t", body[1]);
         for(i = 0; i < num_missing_segment; i++)
-            printf("segment[%d] => %d\n", i, body[2+i]);
+            printf("%d  ", body[2+i]);
+        printf("\n");
 
         return -1;
     }
@@ -88,14 +90,13 @@ void request_close(int sock, struct sockaddr_in *recv_adr)
     packet pac;
     size_t pac_len = createPacket(&pac, &header, NULL, 0);
 
-    // send RD package to server
+    // send RC package to server
     sendto(sock, pac, pac_len, 0, (struct sockaddr *)recv_adr, sizeof(*recv_adr));
     deletePacket(pac);
 
     puts("< request close >");
     displayHeader(header);
 }
-
 
 // time-out, return -1
 // if receiver accepted close request, return 0
@@ -117,7 +118,7 @@ int wait_disconnection(int sock, struct sockaddr_in *recv_adr, socklen_t *recv_a
         puts("time-out");
         return -1;
     }
-
+    
     disconn_response->response_type = ((akh_pdu_header *)response)->msg_type;
 
     // if receiver accepted close request, return 0
@@ -139,9 +140,10 @@ int wait_disconnection(int sock, struct sockaddr_in *recv_adr, socklen_t *recv_a
         // memcpy(disconn_response->segment_list, response + sizeof(akh_pdu_header) + 2 * sizeof(uint32_t), disconn_response->segment_num * sizeof(uint32_t));
 
         puts("< receive request segment >");
-        printf("segment_num => %d\n", disconn_response->segment_num);
+        printf("segment_num => %d\n\t", disconn_response->segment_num);
         for(i = 0; i < disconn_response->segment_num; i++)
-            printf("segment[%d] => %d\n", i, disconn_response->segment_list[i]);
+            printf("%d  ", disconn_response->segment_list[i]);
+        printf("\n");
         return 1;
     }
     // otherwise, return 2;
@@ -151,3 +153,61 @@ int wait_disconnection(int sock, struct sockaddr_in *recv_adr, socklen_t *recv_a
     }
 }
 
+int wait_disconnection_pipe(struct sockaddr_in *recv_adr, socklen_t *recv_adr_sz, akh_disconn_response *disconn_response) {
+    if(disconn_response->segment_list != NULL)
+        free(disconn_response->segment_list);
+
+    char* response;
+    ssize_t response_len;
+    *recv_adr_sz = sizeof(*recv_adr);
+    
+    // unpack thread local storage, extract this thread's reading port.
+    argstruct* tls = (argstruct*)pthread_getspecific(thread_key);
+    int clnt_thread_read_fd = tls->clnt_pipe_read_fd;
+    clnt_thread_rcv_t pkg = read_with_timeout(clnt_thread_read_fd, TIMEOUT, 0, NUM_TRY);
+    printf("read with TIMEOUT %d second, NUMTRY %d times finished.\n", TIMEOUT, NUM_TRY);
+    
+    // unpack the pkg
+    response = pkg.pac;
+    response_len = (ssize_t)(pkg.pac_len);
+    *recv_adr = pkg.clnt_addr;
+    *recv_adr_sz = sizeof(struct sockaddr_in);
+
+    if(response_len == 0 && response == NULL) {
+    	// error_handling("fail connection error");
+        puts("time-out");
+        return -1;
+    }
+    
+    disconn_response->response_type = ((akh_pdu_header *)response)->msg_type;
+
+    // if receiver accepted close request, return 0
+    if(disconn_response->response_type == AC) {
+        puts("< receive accept close >");
+        return 0;
+    }
+    // if receipient is not ready to close, i.e. there is missing segments, return 1
+    else if(disconn_response->response_type == RS) {
+        uint32_t *p_body = (uint32_t *)(response + sizeof(akh_pdu_header));
+        disconn_response->segment_size = p_body[0];
+        disconn_response->segment_num = p_body[1];
+        // do not free memory here; after we finish using the segment_list, the memory can be freed.
+        disconn_response->segment_list = (uint32_t *)malloc(disconn_response->segment_num * sizeof(uint32_t));
+        for(uint32_t i = 0; i < disconn_response->segment_num; i++)
+            disconn_response->segment_list[i] = p_body[2 + i];
+
+        // memcpy(disconn_response->segment_list, response + sizeof(akh_pdu_header) + 2 * sizeof(uint32_t), disconn_response->segment_num * sizeof(uint32_t));
+
+        puts("< receive request segment >");
+        printf("segment_num => %d\n\t", disconn_response->segment_num);
+        for(uint32_t i = 0; i < disconn_response->segment_num; i++)
+            printf("%d  ", disconn_response->segment_list[i]);
+        printf("\n");
+        return 1;
+    }
+    // otherwise, return 2;
+    else {
+        printf("< receive other message type %x >", disconn_response->response_type);
+        return 2;
+    }
+}

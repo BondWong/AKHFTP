@@ -7,7 +7,7 @@
  *	    This file declares functions for disconnecting the two paries.
  *	    1. handle_request_close: function for the file receiver to handle request close (RC) message from the file sender
  *	    2. request_close:  function that generates a RC message
- *	    3. wait_disconnection: function for the file sender to handle the responses (AC or RS) to the RC message it sent 
+ *	    3. wait_disconnection: function for the file sender to handle the responses (AC or RS) to the RC message it sent
  * * */
 #ifndef __DISCONNECTION_H__
 #define __DISCONNECTION_H__
@@ -29,6 +29,7 @@ void request_close(int sock, struct sockaddr_in *recv_adr);
 // if receipient is not ready to close, i.e. there is missing segments, return 1
 // otherwise, return 2;
 int wait_disconnection(int sock, struct sockaddr_in *recv_adr, socklen_t *recv_adr_sz, akh_disconn_response *disconn_response);
+int wait_disconnection_pipe(struct sockaddr_in *recv_adr, socklen_t *recv_adr_sz, akh_disconn_response *disconn_response);
 
 #endif
 

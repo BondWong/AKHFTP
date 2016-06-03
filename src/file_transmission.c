@@ -20,6 +20,8 @@
 #include "map.h"
 #include "map_util.h"
 
+#include "thread_util.h"
+
 
 size_t write_segment(void *buf, size_t size, char *filename)
 {
@@ -32,7 +34,7 @@ size_t read_segment(void *buf, size_t size, int seg_num, char *filename)
 }
 
 
-// reciever uses this function to receive file
+// reciever uses the function
 int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz, char *filename, uint32_t seg_size)
 {
     off_t current_filesize = get_file_size(filename);
@@ -77,12 +79,68 @@ int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz,
         printf("msg_type = %x\tseq_num = %d\n", pheader->msg_type, pheader->seq_num);
     } while(((akh_pdu_header *)response)->msg_type == SS);
 
+    return ((akh_pdu_header *)response)->msg_type;
+}
+
+int receive_file_pipe(struct sockaddr_in *send_adr, socklen_t *send_adr_sz, char *filename, uint32_t seg_size) {
+    // unpack thread local storage, extract this thread's reading port.
+    argstruct* tls = (argstruct*)pthread_getspecific(thread_key);
+    int clnt_thread_read_fd = tls->clnt_pipe_read_fd;
+
+    off_t current_filesize = get_file_size(filename);
+    uint32_t curr_segment_num = (current_filesize % seg_size != 0) ? 1 + current_filesize / seg_size : current_filesize / seg_size;
+
+    char* response = (char*)malloc(sizeof(char)*MAX_BUFFER_SIZE);
+    ssize_t response_len;
+    buffer *b;
+	create_buffer(&b, 1024);
+
+    do {
+        clnt_thread_rcv_t pkg = read_with_timeout(clnt_thread_read_fd, TIMEOUT, 0, NUM_TRY);
+        printf("read with TIMEOUT %d second, NUMTRY %d times finished.\n", TIMEOUT, NUM_TRY);
+        
+        // unpack the pkg
+        response = pkg.pac;
+        response_len = (ssize_t)(pkg.pac_len);
+        *send_adr = pkg.clnt_addr;
+        *send_adr_sz = sizeof(struct sockaddr_in);
+
+        akh_pdu_header *pheader = (akh_pdu_header *)response;
+
+        // time-out
+        if(response_len == -1)
+            return -1;
+        else if(pheader->msg_type == SS) {
+            printf("SS seq_num => %d\n", pheader->seq_num);
+            if(pheader->seq_num == curr_segment_num) {
+                write_segment(response + sizeof(akh_pdu_header), response_len - sizeof(akh_pdu_header), filename);
+                curr_segment_num++;
+            }
+            else {
+		        push(b, response, response_len);
+            }
+            uint32_t temp;
+            do {
+                temp = curr_segment_num;
+                pop(b, response, &response_len);
+                pheader = (akh_pdu_header *)response;
+                if(pheader->seq_num == curr_segment_num) {
+                    write_segment(response + sizeof(akh_pdu_header), response_len - sizeof(akh_pdu_header), filename);
+                    curr_segment_num++;
+                }
+                push(b, response, response_len);
+            } while(pheader->seq_num == temp);
+
+        }
+
+        puts("< receive file segment >");
+        printf("msg_type = %x\tseq_num = %d\n", pheader->msg_type, pheader->seq_num);
+    } while(((akh_pdu_header *)response)->msg_type == SS);
 
     return ((akh_pdu_header *)response)->msg_type;
 }
 
-
-// sender uses this function to send files
+// sender uses the function
 int send_file(int sock, struct sockaddr_in *recv_adr, char *filename, akh_disconn_response *disconn_response)
 {
     uint32_t seg_size = disconn_response->segment_size;
@@ -102,6 +160,7 @@ int send_file(int sock, struct sockaddr_in *recv_adr, char *filename, akh_discon
         buf_len = read_segment(buf, seg_size, seg_num, filename);
         pac_len = createPacket(&pac, &header, buf, buf_len);
         sendto(sock, pac, pac_len, 0, (struct sockaddr *)recv_adr, sizeof(*recv_adr));
+
         deletePacket(pac);
 
         puts("< send file segment >");

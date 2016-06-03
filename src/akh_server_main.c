@@ -3,7 +3,6 @@
  * Group member: Jae Hoon Kim, Junking Huang, Ni An
  * Purpose: This file contains the main function for a AKHFTP server.
  * */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -11,16 +10,14 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <pthread.h>
 
-#include "error_handling.h"
-#include "message.h"
-#include "message_util.h"
-#include "file_util.h"
-#include "security_util.h"
-#include "connection.h"
-#include "file_transmission.h"
-#include "disconnection.h"
+#include "hashmap.h"
+#include "thread_util.h"
 
+#define THREAD_MAP_CAPACITY 50
+#define PIPE_READ   0
+#define PIPE_WRITE  1
 
 int main(int argc, char *argv[])
 {
@@ -29,12 +26,9 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    char filename[MAX_FILENAME_SIZE];
-    off_t filesize;
     int serv_sock, option;
     struct sockaddr_in serv_adr, clnt_adr;
-    char pac[MAX_BUFFER_SIZE];
-    socklen_t clnt_adr_sz, optlen;
+    socklen_t optlen;
 
     // create server socket
     serv_sock = socket(PF_INET, SOCK_DGRAM, 0);
@@ -50,43 +44,81 @@ int main(int argc, char *argv[])
     memset(&serv_adr, 0, sizeof(serv_adr));
     serv_adr.sin_family = AF_INET;
     serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
-    /******************** SERVICE *****************/
     serv_adr.sin_port = htons(atoi(argv[1]));
-    // bind assigns serv_adr to the socket serv_sock
+
     if(bind(serv_sock, (struct sockaddr *)&serv_adr, sizeof(serv_adr)) == -1)
         error_handling("bind() error");
-    // handle request
-    int request_type = handle_request(serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
-    // Request download
-    if(request_type == RD) {
-        connection_download_server(serv_sock, &clnt_adr, &clnt_adr_sz, filename, &filesize);
 
-        akh_disconn_response disconn_response;
-        disconn_response.segment_list = NULL;
+    // initialize a map that takes in clnt_thread_key:pipeFD[PIPE_WRITE] pair
+    hashmap* clnt_thread_LUT = create_hashmap(THREAD_MAP_CAPACITY);
+    // initialize thread local storage key
+    pthread_key_create(&thread_key, NULL);
 
-        while(wait_disconnection(serv_sock, &clnt_adr, &clnt_adr_sz, &disconn_response) != 0) {
-            send_file(serv_sock, &clnt_adr, filename, &disconn_response);
-            request_close(serv_sock, &clnt_adr);
+    // Only the monitor thread will watch the socket
+    while(1) {
+        puts("Monitor waiting incoming packet...");
+    
+        char* pac = (char*)malloc(MAX_BUFFER_SIZE*sizeof(char));
+        size_t pac_len;
+        socklen_t clnt_adr_sz = sizeof(struct sockaddr_in);
+        pac_len = recvfrom(serv_sock, pac, MAX_BUFFER_SIZE, 0, (struct sockaddr *)&clnt_adr, &clnt_adr_sz);
+        
+        puts("Monitor received packet:");
+        printPacket(pac, pac_len);
+        
+        // convert clnt_adr to uint64_t hashmap key using sockaddr_in.sin_family, sin_port, sin_addr
+        uint64_t clnt_thread_key = ((uint64_t)(clnt_adr.sin_addr.s_addr) << 32) | (clnt_adr.sin_port << 16) | clnt_adr.sin_family;
+        uint32_t result = 0;
+        
+        printf("monitor searching key %ld...\n", clnt_thread_key);
+        if(hashmap_get(clnt_thread_LUT, clnt_thread_key, &result) < 0) {
+            printf("monitor cannot find key %ld...\n", clnt_thread_key);
+            // no thread has been created for this client.
+            
+            // 1: create a pipe for the client thread
+            int* pipe_fd = (int*)malloc(sizeof(int)*2);
+            if(pipe(pipe_fd) < 0) {
+                perror("cannot create pipe for incoming new client.");
+                continue;
+            }
+            printf("monitor created pipe [%d,%d] for clnt thread...\n", pipe_fd[0], pipe_fd[1]);
+            
+            // 2: add thread writing port to the map
+            result = pipe_fd[PIPE_WRITE];
+            hashmap_put(clnt_thread_LUT, clnt_thread_key, result);
+            
+            printf("monitor puts [%ld=>%d] into map...\n", clnt_thread_key, result);
+        
+            // 3: create thread
+            // 4: pass argstruct to thread
+            argstruct* threadarg = (argstruct*)malloc(sizeof(argstruct));
+            threadarg->clnt_pipe_read_fd = pipe_fd[PIPE_READ];
+            threadarg->serv_sock = serv_sock;
+            
+            printf("monitor ready to create a thread for clnt with port %d\n", *pipe_fd);
+            pthread_t thread;
+            pthread_create(&thread, NULL, 
+                           clnt_thread_callback, (void*)threadarg);  // pipe_fd[PIPE_READ] is the reading port.
+        }
+
+        int client_thread_pipe_write_fd = result;
+        printf("monitor figured out client thread writing end at %d...\n", result);
+        
+        // ready the communication package
+        clnt_thread_rcv_t package;
+        package.pac = pac;
+        package.pac_len = pac_len;
+        package.clnt_addr = clnt_adr;
+        package.clnt_addr_sz = clnt_adr_sz;
+        
+        // write the communcation package to the pipe
+        if(write(client_thread_pipe_write_fd, (void*)&package, sizeof(clnt_thread_rcv_t)) != sizeof(clnt_thread_rcv_t)) {
+            perror("cannot pass received package to the client thread.");
+            continue;
         }
     }
-    // Request upload
-    else if(request_type == RU) {
-        connection_upload_server(serv_sock, &clnt_adr, &clnt_adr_sz, &filesize);
-
-        uint32_t body_size = 10; 
-        int num_time_out = 0;
-        while(num_time_out < 3 && handle_request_close(serv_sock, &clnt_adr, filename, filesize, 10) != 0) {
-            int msg_type = receive_file(serv_sock, &clnt_adr, &clnt_adr_sz, filename, body_size);
-            if(msg_type == -1) // problem in connection
-                num_time_out++;
-            else
-                num_time_out = 0;
- 
-        }
-        if(num_time_out > 2)
-            error_handling("connection error");
-    }
-
+    
+    //  FIXME: memory leak on pipe_fd.
     close(serv_sock);
     return 0;
 }

@@ -32,10 +32,9 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv_adr;
     socklen_t serv_adr_sz;
     off_t filesize;
-    
+
     memset(&serv_adr, 0, sizeof(serv_adr));
     serv_adr.sin_family = AF_INET;
-    /**************** SERVICE *******************/
     serv_adr.sin_addr.s_addr = inet_addr(argv[1]);
     serv_adr.sin_port = htons(atoi(argv[2]));
 
@@ -43,6 +42,11 @@ int main(int argc, char *argv[])
     if(sock == -1) {
     	error_handling("create socket error");
     }
+    
+    struct sockaddr created_socket_addr;
+    socklen_t created_socket_len;
+    getsockname(sock, &created_socket_addr, &created_socket_len);
+    char* sa_data = created_socket_addr.sa_data;
 
     if(strcmp(argv[3], "-d") == 0) {
         if( (filesize = connection_download_client(sock, &serv_adr, filename)) == 0) {

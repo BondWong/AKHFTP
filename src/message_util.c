@@ -15,14 +15,12 @@
 
 #include "message_util.h"
 
-// create common AKH header
 akh_pdu_header createHeader(uint16_t msg_type, uint32_t seq_num)
 {
     akh_pdu_header header = {0, msg_type, seq_num, 0}; // { .ver = 0, .msg_type = msg_type, .seq_num = seq_num, .body_len = 0 };
     return header;
 }
 
-//  print out information in header
 void displayHeader(akh_pdu_header header)
 {
     printf("ver => %d\n", header.ver);
@@ -30,7 +28,7 @@ void displayHeader(akh_pdu_header header)
     printf("seq_num => %u\n", header.seq_num);
     printf("body_len => %d\n", header.body_len);
 }
-//create a AKH packet
+
 size_t createPacket(packet *pac, akh_pdu_header *header, akh_pdu_body body, size_t body_len)
 {
     header->body_len = body_len;
@@ -43,7 +41,7 @@ size_t createPacket(packet *pac, akh_pdu_header *header, akh_pdu_body body, size
         memcpy(*pac + sizeof(akh_pdu_header), body, body_len);
     return sizeof(akh_pdu_header) + body_len;
 }
-// free the memory previously allocated for a packet
+
 void deletePacket(packet pac)
 {
     free(pac);
@@ -52,4 +50,18 @@ void deletePacket(packet pac)
 // stub function, return 2kb
 unsigned long get_pac_max() {
     return 2 * 1024;
+}
+
+void printPacket(packet pac, size_t pac_len) {
+    printf("=======PACKET CONTENT(size %u)=====\n", (unsigned int)pac_len);
+    if(pac_len < 12 || pac_len > MAX_BUFFER_SIZE) {
+        printf("printPacket: pac_len %u < header size 12\n", (unsigned int)pac_len);
+        return;
+    }
+
+    for(size_t i = 0; i < pac_len; ++i) {
+        if (i != 0 && (i%4)==0) printf("\n");
+        printf("%02x ", (unsigned char)pac[i]);
+    }
+    printf("\n====== END ==========\n");
 }

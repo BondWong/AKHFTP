@@ -7,6 +7,7 @@ struct node
     struct node* next;
 };
 
+typedef struct node node;
 typedef struct node* map_elem;
 
 struct map

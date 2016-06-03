@@ -1,8 +1,8 @@
 CC = gcc
 
-CFLAGS = -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include # debugging, compiler warnings, warning, optimize, object file
+CFLAGS = -g -Wall -W -c -O2 -I /usr/local/opt/openssl/include # debugging, compiler warnings, warning, optimize, object file
 
-LDFLAGS = -lssl -lcrypto -L /usr/local/opt/openssl/lib # link the ssl library, link the crypto library, library location
+LDFLAGS = -lssl -lcrypto -pthread -L /usr/local/opt/openssl/lib # link the ssl library, link the crypto library, library location
 
 ERROR_HANDLING = error_handling
 NETWORK_UTIL = network_util
@@ -14,12 +14,14 @@ FILE_TRANSMISSION = file_transmission
 DISCONNECTION = disconnection
 BUFFER_UTIL = buffer_util
 MAP_UTIL = map_util
+THREAD_UTIL = thread_util
+HASHMAP = hashmap
 
 AKH_SERVER_MAIN = akh_server_main
 AKH_CLIENT_MAIN = akh_client_main
 
-FILES = $(ERROR_HANDLING).c $(FILE_UTIL).c $(MESSAGE_UTIL).c $(SECURITY_UTIL).c $(CONNECTION).c $(FILE_TRANSMISSION).c $(DISCONNECTION).c $(AKH_SERVER_MAIN).c $(AKH_CLIENT_MAIN).c $(NETWORK_UTIL).c $(BUFFER_UTIL).c $(MAP_UTIL).c
-OBJ =  $(ERROR_HANDLING).o $(FILE_UTIL).o $(MESSAGE_UTIL).o $(SECURITY_UTIL).o $(CONNECTION).o $(FILE_TRANSMISSION).o $(DISCONNECTION).o $(NETWORK_UTIL).o $(BUFFER_UTIL).o $(MAP_UTIL).o
+FILES = $(ERROR_HANDLING).c $(FILE_UTIL).c $(MESSAGE_UTIL).c $(SECURITY_UTIL).c $(CONNECTION).c $(FILE_TRANSMISSION).c $(DISCONNECTION).c $(AKH_SERVER_MAIN).c $(AKH_CLIENT_MAIN).c $(NETWORK_UTIL).c $(BUFFER_UTIL).c $(MAP_UTIL).c $(THREAD_UTIL).c $(HASHMAP).c
+OBJ =  $(ERROR_HANDLING).o $(FILE_UTIL).o $(MESSAGE_UTIL).o $(SECURITY_UTIL).o $(CONNECTION).o $(FILE_TRANSMISSION).o $(DISCONNECTION).o $(NETWORK_UTIL).o $(BUFFER_UTIL).o $(MAP_UTIL).o $(THREAD_UTIL).o $(HASHMAP).o
 
 SERVER = server
 CLIENT = client
@@ -51,15 +53,12 @@ run_client_download: $(CLIENT)
 
 run_client_upload: $(CLIENT)
 	cd ./client_dir && ./$(CLIENT) $(IP) $(PORT) $(UPLOAD) $(UFILENAME)
-
-run_client_upload2: $(CLIENT)
-	cd ./client_dir && ./$(CLIENT) $(IP) $(PORT) $(UPLOAD) $(UFILENAME2)
-
+	
 clean:
 	rm -rf *.o
 	rm -rf *.gch
 	rm -rf ./server_dir/$(SERVER) ./client_dir/$(CLIENT)
-	rm -rf ./server_dir/client.txt ./client_dir/server.txt
+	rm -rf ./server_dir/client.txt ./client_dir/server.txt ./client_dir/server1.txt ./client_dir/server2.txt
 
 bond: compile
 	$(CC) $(CLIENT_O) $(OBJ) test_buffer.c -o test $(LDFLAGS)

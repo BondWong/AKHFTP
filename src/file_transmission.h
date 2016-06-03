@@ -21,7 +21,9 @@
 
 int test_receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz);
 // reciever uses the function
+
 int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz, char *filename, uint32_t seg_size);
+int receive_file_pipe(struct sockaddr_in *send_adr, socklen_t *send_adr_sz, char *filename, uint32_t seg_size);
 
 // sender uses the function
 int send_file(int sock, struct sockaddr_in *recv_adr, char *filename, akh_disconn_response *disconn_response);
