@@ -1,0 +1,21 @@
+Requirement description
+
+This document describes which files in the source code satisfy each of the specific requirement.
+
+Protocol requirement:
+1. Stateful: 
+  i) akh_server_main.c: this file contains the main function for implementing the DFA on the server side.  
+  ii) akh_client_main.c: this file contains the main function for implementing the DFA on the client side.
+
+2. Concurrent:
+  
+3. Service:
+   i) Makefile: in this file, we can specify a specific port number (default 9090) as the command arguments to the server.  
+   ii) akh_server_main.c: in this file, we bind the server to the port number defined in Makefile.
+4. Client:
+   i) Makefile: in this file, we can specify a specific port number (default 9090) and the host name of the server as the command arguments passed to the client.  
+   ii) akh_client_main.c: in this file, the client can send messages to the host (IP) and port number defined in Makefile.
+
+5. UI: 
+
+
