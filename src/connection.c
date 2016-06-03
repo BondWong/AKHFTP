@@ -99,13 +99,22 @@ void connection_download_server(int serv_sock, struct sockaddr_in *clnt_adr, soc
 {
     akh_pdu_header header;
     *filesize = get_file_size(filename);
-    if(*filesize != 0)
+    packet response;
+    size_t response_len;
+    if(*filesize != 0) {
         header = createHeader(AD, randNum());
+        response_len = createPacket(&response, &header, (akh_pdu_body)filesize, sizeof(off_t));
+    }
     else {
         header = createHeader(EA, randNum());
+	akh_pdu_body security_level = (akh_pdu_body)malloc(sizeof(char) * 2);
+	security_level = (akh_pdu_body) SEC_LEVEL_LOW;
+	akh_pdu_body error_description = (akh_pdu_body) FILE_NOT_FOUND;
+	akh_pdu_body body = (akh_pdu_body) malloc(sizeof(char) * 4);
+	memcpy(body, security_level, strlen(security_level));
+	memcpy(body + sizeof(security_level), error_description, strlen(error_description));
+        response_len = createPacket(&response, &header, (akh_pdu_body)filesize, sizeof(off_t));
     }
-    packet response;
-    size_t response_len = createPacket(&response, &header, (akh_pdu_body)filesize, sizeof(off_t));
 
     sendto(serv_sock, response, response_len, 0, (struct sockaddr *)clnt_adr, *clnt_adr_sz);
     deletePacket(response);
