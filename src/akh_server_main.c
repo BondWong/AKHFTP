@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     }
     // Request upload
     else if(request_type == RU) {
-        connection_upload_server(serv_sock, &clnt_adr, &clnt_adr_sz);
+        connection_upload_server(serv_sock, &clnt_adr, &clnt_adr_sz, &filesize);
 
         uint32_t body_size = 10; 
         int num_time_out = 0;

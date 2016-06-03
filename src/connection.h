@@ -19,7 +19,7 @@ void connection_download_server(int serv_sock, struct sockaddr_in *clnt_adr, soc
 int connection_upload_client(int sock, struct sockaddr_in *serv_adr, char *filename, off_t *filesize);
 
 // when client requests upload, server uses the function to make connection
-void connection_upload_server(int serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz);
+void connection_upload_server(int serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz, off_t *filesize);
 
 #endif
 
