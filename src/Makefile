@@ -29,6 +29,7 @@ PORT = 9190
 DOWNLOAD = -d
 UPLOAD = -u
 UFILENAME = client.txt
+UFILENAME2 = War_and_Peace
 DFILENAME = server.txt
 
 
@@ -49,6 +50,9 @@ run_client_download: $(CLIENT)
 
 run_client_upload: $(CLIENT)
 	cd ./client_dir && ./$(CLIENT) $(IP) $(PORT) $(UPLOAD) $(UFILENAME)
+
+run_client_upload2: $(CLIENT)
+	cd ./client_dir && ./$(CLIENT) $(IP) $(PORT) $(UPLOAD) $(UFILENAME2)
 
 clean:
 	rm -rf *.o
