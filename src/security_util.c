@@ -1,3 +1,8 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: This file defines the function for generating a 4-byte pseudorandom number
+ * */
 #include <stdio.h>
 #include <stdint.h>
 

@@ -25,7 +25,8 @@ SERVER = server
 CLIENT = client
 
 IP = 127.0.0.1
-PORT = 9190
+#/**************** SERVICE ************/#
+PORT = 9190  # The hard coded port number
 DOWNLOAD = -d
 UPLOAD = -u
 UFILENAME = client.txt
