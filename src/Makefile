@@ -53,7 +53,10 @@ run_client_download: $(CLIENT)
 
 run_client_upload: $(CLIENT)
 	cd ./client_dir && ./$(CLIENT) $(IP) $(PORT) $(UPLOAD) $(UFILENAME)
-	
+
+run_client: $(CLIENT)
+	cd ./client_dir && ./$(CLIENT)
+
 clean:
 	rm -rf *.o
 	rm -rf *.gch
