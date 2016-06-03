@@ -32,21 +32,21 @@ int main(int argc, char *argv[])
     char option[3];
     char filename[MAX_FILENAME_SIZE];
     if (argc == 1){
-	printf("Please input IP address of the server\n");
-	scanf("%s", host_ip);
-	printf("Please input port number of the service (default 9190)\n");
-	scanf("%s", host_port);
-	printf("Please input client options '-d' or '-u'\n");
-	scanf("%s", option);
-	printf("Please input file name (e.g. Download: 'server.txt' or Upload: 'client.txt)\n");
-	scanf("%s", filename);
+        printf("Please input IP address of the server\n");
+        scanf("%s", host_ip);
+        printf("Please input port number of the service (default 9190)\n");
+        scanf("%s", host_port);
+        printf("Please input client options '-d' or '-u'\n");
+        scanf("%s", option);
+        printf("Please input file name (e.g. Download: 'server.txt' or Upload: 'client.txt)\n");
+        scanf("%s", filename);
     }
     // $make run_client_download or $make run_client_upload
     if (argc == 5){
-	strcpy(host_ip, argv[1]);
-	strcpy(host_port, argv[2]);
-	strcpy(option, argv[3]);
-	strcpy(filename, argv[4]);
+        strcpy(host_ip, argv[1]);
+        strcpy(host_port, argv[2]);
+        strcpy(option, argv[3]);
+        strcpy(filename, argv[4]);
     }
     int sock;
     struct sockaddr_in serv_adr;
