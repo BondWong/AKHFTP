@@ -1,3 +1,8 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: the header file of file_util.c
+ * * */
 #ifndef __FILE_UTIL_H__
 #define __FILE_UTIL_H__
 

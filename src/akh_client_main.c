@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
 
     memset(&serv_adr, 0, sizeof(serv_adr));
     serv_adr.sin_family = AF_INET;
+    /**************** CLIENT *******************/
     serv_adr.sin_addr.s_addr = inet_addr(argv[1]);
     serv_adr.sin_port = htons(atoi(argv[2]));
 

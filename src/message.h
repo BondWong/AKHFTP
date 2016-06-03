@@ -23,7 +23,7 @@
 #define MAX_FILENAME_SIZE 128
 #define MAX_BUFFER_SIZE (1024 * 128) // maximum buffer size 128 kb
 #define MAX_RESPONSE_SIZE (1024 * 2) // maximum response size kb
-
+// Define PDU header structure
 typedef struct tag_akh_pdu_header
 {
     uint16_t ver;      // version
@@ -31,14 +31,14 @@ typedef struct tag_akh_pdu_header
     uint32_t seq_num;  // sequence number
     uint32_t body_len; // body length
 } akh_pdu_header;
-
+// Define PDU body
 typedef char * akh_pdu_body;
-
+// Define packet
 typedef char * packet;
-
+// Define the response to RC (request close) message during the disconnection phase
 typedef struct akh_disconnection_response
 {
-    uint16_t response_type; // the message type of the response to RS
+    uint16_t response_type; // the message type of the response to RC
     uint32_t segment_size; // the size of one segment during transmission
     uint32_t segment_num; // number of missing segment
     uint32_t *segment_list; // the list of the sequence numbers of missing segements

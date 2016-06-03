@@ -27,7 +27,7 @@ SERVER = server
 CLIENT = client
 
 IP = 127.0.0.1 # The IP address of the server
-#/**************** SERVICE ************/#
+#/**************** SERVICE/CLIENT ************/#
 PORT = 9190  # The hard coded port number
 DOWNLOAD = -d
 UPLOAD = -u
