@@ -1,3 +1,9 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: define functions for 1) sending and receiving file segments
+ *				 2) read and write file segments
+ * */
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -26,7 +32,7 @@ size_t read_segment(void *buf, size_t size, int seg_num, char *filename)
 }
 
 
-// reciever uses the function
+// reciever uses this function to receive file
 int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz, char *filename, uint32_t seg_size)
 {
     off_t current_filesize = get_file_size(filename);
@@ -76,7 +82,7 @@ int receive_file(int sock, struct sockaddr_in *send_adr, socklen_t *send_adr_sz,
 }
 
 
-// sender uses the function
+// sender uses this function to send files
 int send_file(int sock, struct sockaddr_in *recv_adr, char *filename, akh_disconn_response *disconn_response)
 {
     uint32_t seg_size = disconn_response->segment_size;
