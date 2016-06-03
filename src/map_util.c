@@ -5,7 +5,7 @@
 #include "map_util.h"
 
 uint32_t hash_code(uint32_t key, unsigned int capacity) {
-	char nums[32];
+	char* nums = (char*)calloc(32,sizeof(char));
 	sprintf(nums, "%d", key);
 
 	uint32_t hash = 0;
@@ -14,6 +14,7 @@ uint32_t hash_code(uint32_t key, unsigned int capacity) {
 		hash = hash * a + nums[i];
 		a = a * b;
 	}
+	free(nums);
 	return hash % capacity;
 }
 
