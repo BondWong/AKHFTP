@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -g -Wall -W -c -O2 -I /usr/local/opt/openssl/include # debugging, compiler warnings, warning, optimize, object file
+CFLAGS = -g -Wall -W -c -O2 -I /usr/local/opt/openssl/include -std=gnu99 # debugging, compiler warnings, warning, optimize, object file
 
 LDFLAGS = -lssl -lcrypto -pthread -L /usr/local/opt/openssl/lib # link the ssl library, link the crypto library, library location
 
@@ -21,6 +21,7 @@ AKH_SERVER_MAIN = akh_server_main
 AKH_CLIENT_MAIN = akh_client_main
 
 FILES = $(ERROR_HANDLING).c $(FILE_UTIL).c $(MESSAGE_UTIL).c $(SECURITY_UTIL).c $(CONNECTION).c $(FILE_TRANSMISSION).c $(DISCONNECTION).c $(AKH_SERVER_MAIN).c $(AKH_CLIENT_MAIN).c $(NETWORK_UTIL).c $(BUFFER_UTIL).c $(MAP_UTIL).c $(THREAD_UTIL).c $(HASHMAP).c
+
 OBJ =  $(ERROR_HANDLING).o $(FILE_UTIL).o $(MESSAGE_UTIL).o $(SECURITY_UTIL).o $(CONNECTION).o $(FILE_TRANSMISSION).o $(DISCONNECTION).o $(NETWORK_UTIL).o $(BUFFER_UTIL).o $(MAP_UTIL).o $(THREAD_UTIL).o $(HASHMAP).o
 
 SERVER = server
@@ -32,7 +33,7 @@ PORT = 9190  # The hard coded port number
 DOWNLOAD = -d
 UPLOAD = -u
 UFILENAME = client.txt # name of the upload file
-UFILENAME2 = War_and_Peace 
+UFILENAME2 = War_and_Peace
 DFILENAME = server.txt # name of the download file
 
 
