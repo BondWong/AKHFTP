@@ -1,3 +1,9 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: This the header file for thread_util.c
+ * * */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>

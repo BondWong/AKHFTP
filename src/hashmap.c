@@ -1,3 +1,11 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: hashmap data structure. 
+ *	    Key:value pair is uint64_t:uint32_t. 
+ *	    Support insert and inquiry operation. 
+ *	    Use link list structure.
+ * */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -14,10 +14,12 @@ C
 ### compile server
 type 'make server'
 it generates excutable file 'server' for server side under AKHFTP/src/server_dir
+The server binds to port 9190 (default). The port number can be changed in Makefile.
 
 ### compile client
 type 'make client'
 it generates excutable file 'client for client side under AKHFTP/src/client_dir
+The default host IP address is 127.0.0.1 and default port number is 9190. The host IP address and port number can be changed in Makefile.
 
 ## How to run
 ### run server

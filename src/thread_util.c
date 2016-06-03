@@ -1,3 +1,11 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: To support multi client. Each client is assigned a server thread. 
+ *	    These server threads are isolated from the socket. 
+ *	    A monitor thread is responsible for socket receive operations. 
+ *	    Original timer_recvfrom() function is replaced with read_with_timeout. 
+ *	    The communication between monitor and each server thread is done through fifo pipes  * */
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
