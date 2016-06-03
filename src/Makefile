@@ -24,14 +24,14 @@ OBJ =  $(ERROR_HANDLING).o $(FILE_UTIL).o $(MESSAGE_UTIL).o $(SECURITY_UTIL).o $
 SERVER = server
 CLIENT = client
 
-IP = 127.0.0.1
+IP = 127.0.0.1 # The IP address of the server
 #/**************** SERVICE ************/#
 PORT = 9190  # The hard coded port number
 DOWNLOAD = -d
 UPLOAD = -u
-UFILENAME = client.txt
-UFILENAME2 = War_and_Peace
-DFILENAME = server.txt
+UFILENAME = client.txt # name of the upload file
+UFILENAME2 = War_and_Peace 
+DFILENAME = server.txt # name of the download file
 
 
 compile: $(FILES) 

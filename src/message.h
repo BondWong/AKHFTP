@@ -14,11 +14,11 @@
 #define AU 0x0004 // Accept Upload
 #define RS 0x0005 // Request Segments
 #define SS 0x0006 // Send Segment
-#define RB 0x0007 // Request Blocking
-#define RC 0x0008 // Request Close
-#define AC 0x0009 // Accept Close
-#define DR 0x000A // Deny Request
-#define EA 0x000B // Error Alert
+//#define RB 0x0007 // Request Blocking
+#define RC 0x0007 // Request Close
+#define AC 0x0008 // Accept Close
+#define DR 0x0009 // Deny Request
+#define EA 0x000A // Error Alert
 
 #define MAX_FILENAME_SIZE 128
 #define MAX_BUFFER_SIZE (1024 * 128) // maximum buffer size 128 kb
