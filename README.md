@@ -14,11 +14,13 @@ C
 ### compile server
 type 'make server'
 it generates excutable file 'server' for server side under AKHFTP/src/server_dir
+
 The server binds to port 9190 (default). The port number can be changed in Makefile.
 
 ### compile client
 type 'make client'
 it generates excutable file 'client for client side under AKHFTP/src/client_dir
+
 The default host IP address is 127.0.0.1 and default port number is 9190. The host IP address and port number can be changed in Makefile.
 
 ## How to run
@@ -38,6 +40,11 @@ It request upload file 'client.txt' to server. The server stores the file under 
 Fo the test case, we made limitation of server application. If client requests upload file greater than 1KB, server rejects the requestion. The real program only rejects upload request when it does not have enough space.
 To test that, type 'make run_client_upload2'
 After client requests upload, it gets back deny message from server because the file size is greater than 1 KB.
+
+### test client (interactively command line UI)
+type 'make run_client'
+
+Then follows the instructions printed out on the interactive command line to input arguments for client. For example: "Please input IP address of the server", you should type in the IPv4 address of the server.
 
 ## Extra Credit:
 We did not implement extra credit task.
