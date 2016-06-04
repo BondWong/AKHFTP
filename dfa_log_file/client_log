@@ -1,0 +1,153 @@
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o akh_client_main.o akh_client_main.c
+gcc  error_handling.o file_util.o message_util.o security_util.o connection.o file_transmission.o disconnection.o network_util.o buffer_util.o map_util.o akh_client_main.o -o ./client_dir/client -lssl -lcrypto -L /usr/local/opt/openssl/lib 
+cd ./client_dir && ./client 127.0.0.1 9190 -d server.txt
+
+-------------------------------------------------------------------------------------------------------
+                                         DFA: Close
+-------------------------------------------------------------------------------------------------------
+
+< download request >
+- send pac -
+ver => 0
+msg_type => 1
+seq_num => 3608008176
+body_len => 10
+filename: server.txt
+
+-------------------------------------------------------------------------------------------------------
+                                         DFA: Wait-Open
+-------------------------------------------------------------------------------------------------------
+
+- receive pac -
+ver => 0
+msg_type => 3
+seq_num => 2306692105
+body_len => 8
+file size 371
+
+< send request segments>
+ver => 0
+msg_type => 5
+seq_num => 1699023615
+body_len => 40
+segment size => 50
+num missing segment => 8
+segment[0] => 0
+segment[1] => 1
+segment[2] => 2
+segment[3] => 3
+segment[4] => 4
+segment[5] => 5
+segment[6] => 6
+segment[7] => 7
+SS seq_num => 0
+
+
+-------------------------------------------------------------------------------------------------------
+                                         DFA: Receive
+-------------------------------------------------------------------------------------------------------
+
+
+< receive file segment >
+msg_type = 6	seq_num = 0
+SS seq_num => 1
+< receive file segment >
+msg_type = 1520	seq_num = 32764
+
+-------------------------------------------------------------------------------------------------------
+                                         DFA: Check
+-------------------------------------------------------------------------------------------------------
+
+
+< send request segments>
+ver => 0
+msg_type => 5
+seq_num => 1903752049
+body_len => 32
+segment size => 50
+num missing segment => 6
+segment[0] => 2
+segment[1] => 3
+segment[2] => 4
+segment[3] => 5
+segment[4] => 6
+segment[5] => 7
+SS seq_num => 2
+
+-------------------------------------------------------------------------------------------------------
+                                         DFA: Wait-Open
+-------------------------------------------------------------------------------------------------------
+
+
+< receive file segment >
+msg_type = 6	seq_num = 2
+SS seq_num => 3
+< receive file segment >
+msg_type = 1520	seq_num = 32764
+
+-------------------------------------------------------------------------------------------------------
+                                         DFA: Check
+-------------------------------------------------------------------------------------------------------
+
+
+< send request segments>
+ver => 0
+msg_type => 5
+seq_num => 3972861274
+body_len => 24
+segment size => 50
+num missing segment => 4
+segment[0] => 4
+segment[1] => 5
+segment[2] => 6
+segment[3] => 7
+SS seq_num => 4
+
+-------------------------------------------------------------------------------------------------------
+                                         DFA: Wait-Open
+-------------------------------------------------------------------------------------------------------
+
+
+< receive file segment >
+msg_type = 6	seq_num = 4
+SS seq_num => 5
+< receive file segment >
+msg_type = 1520	seq_num = 32764
+
+-------------------------------------------------------------------------------------------------------
+                                         DFA: Check
+-------------------------------------------------------------------------------------------------------
+
+
+< send request segments>
+ver => 0
+msg_type => 5
+seq_num => 3051656526
+body_len => 16
+segment size => 50
+num missing segment => 2
+segment[0] => 6
+segment[1] => 7
+SS seq_num => 6
+
+-------------------------------------------------------------------------------------------------------
+                                         DFA: Wait-Open
+-------------------------------------------------------------------------------------------------------
+
+
+< receive file segment >
+msg_type = 6	seq_num = 6
+SS seq_num => 7
+< receive file segment >
+msg_type = 1520	seq_num = 32764
+< send accept close >
+ver => 0
+msg_type => 9
+seq_num => 506879886
+body_len => 0
+
+-------------------------------------------------------------------------------------------------------
+                                         DFA: Close 
+-------------------------------------------------------------------------------------------------------
+
+

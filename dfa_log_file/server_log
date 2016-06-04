@@ -1,0 +1,237 @@
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o error_handling.o error_handling.c
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o file_util.o file_util.c
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o message_util.o message_util.c
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o security_util.o security_util.c
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o connection.o connection.c
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o file_transmission.o file_transmission.c
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o disconnection.o disconnection.c
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o network_util.o network_util.c
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o buffer_util.o buffer_util.c
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o map_util.o map_util.c
+gcc -g -Wall -W -O2 -c -I /usr/local/opt/openssl/include    -c -o akh_server_main.o akh_server_main.c
+gcc  error_handling.o file_util.o message_util.o security_util.o connection.o file_transmission.o disconnection.o network_util.o buffer_util.o map_util.o akh_server_main.o -o ./server_dir/server -lssl -lcrypto -L /usr/local/opt/openssl/lib 
+cd ./server_dir && ./server 9190
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Listen
+------------------------------------------------------------------------------------------------------------
+
+< requested download >
+ver => 0
+msg_type => 1
+seq_num => 3608008176
+body_len => 10
+filename: server.txt
+filesize: 0
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Wait-Open
+------------------------------------------------------------------------------------------------------------
+
+< accept download >
+ver => 0
+msg_type => 3
+seq_num => 2306692105
+body_len => 8
+filesize: 371
+< receive request segment >
+segment_num => 8
+segment[0] => 0
+segment[1] => 1
+segment[2] => 2
+segment[3] => 3
+segment[4] => 4
+segment[5] => 5
+segment[6] => 6
+segment[7] => 7
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Send
+------------------------------------------------------------------------------------------------------------
+
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 0
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 1
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 2
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 3
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 4
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 5
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 6
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 7
+body_len => 21
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Wait-Close
+------------------------------------------------------------------------------------------------------------
+
+
+< request close >
+ver => 0
+msg_type => 8
+seq_num => 3687184849
+body_len => 0
+< receive request segment >
+segment_num => 6
+segment[0] => 2
+segment[1] => 3
+segment[2] => 4
+segment[3] => 5
+segment[4] => 6
+segment[5] => 7
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Send
+------------------------------------------------------------------------------------------------------------
+
+
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 2
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 3
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 4
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 5
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 6
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 7
+body_len => 21
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Wait-Close
+------------------------------------------------------------------------------------------------------------
+
+< request close >
+ver => 0
+msg_type => 8
+seq_num => 486968951
+body_len => 0
+< receive request segment >
+segment_num => 4
+segment[0] => 4
+segment[1] => 5
+segment[2] => 6
+segment[3] => 7
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Send
+------------------------------------------------------------------------------------------------------------
+
+
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 4
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 5
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 6
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 7
+body_len => 21
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Wait-Close
+------------------------------------------------------------------------------------------------------------
+
+
+< request close >
+ver => 0
+msg_type => 8
+seq_num => 1321863413
+body_len => 0
+< receive request segment >
+segment_num => 2
+segment[0] => 6
+segment[1] => 7
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Send
+------------------------------------------------------------------------------------------------------------
+
+
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 6
+body_len => 50
+< send file segment >
+ver => 0
+msg_type => 6
+seq_num => 7
+body_len => 21
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Wait-Close
+------------------------------------------------------------------------------------------------------------
+
+
+< request close >
+ver => 0
+msg_type => 8
+seq_num => 2199155137
+body_len => 0
+< receive accept close >
+
+------------------------------------------------------------------------------------------------------------
+                                      DFA: Listen
+------------------------------------------------------------------------------------------------------------
+
+
