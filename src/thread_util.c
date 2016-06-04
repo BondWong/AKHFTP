@@ -15,6 +15,7 @@
 
 #include "thread_util.h"
 
+/******************** CONCURRENT **********************/
 clnt_thread_rcv_t read_with_timeout(int read_fd, time_t timeout_sec, suseconds_t timeout_usec, int num_try) {
     fd_set set;
     struct timeval timeout;
