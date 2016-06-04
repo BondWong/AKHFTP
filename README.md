@@ -46,5 +46,8 @@ type 'make run_client'
 
 Then follows the instructions printed out on the interactive command line to input arguments for client. For example: "Please input IP address of the server", you should type in the IPv4 address of the server.
 
+## Roubust Testing
+Unfortunately we could not do unit test, but we spent more time for DFA and memory leak with various senario. To verify DFA, our stratigy is that We broke the big complexity into many small problems then we connected each solution together to solve big problems. For example, first we divided our application to three components: connection, file transmission, and disconnection. Then we divided each components to small problems. The big three components are related to sate on DFA and each sate also have many states and step. It gurantee our property of DFA. We also spent a lot of time to manage resource like CPU and memory. We used C language so we should make sure resource management this is because we used threading and allocate memory.
+ 
 ## Extra Credit:
 We did not implement extra credit task.
