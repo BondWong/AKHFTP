@@ -7,7 +7,7 @@
 #define __SECURITY_UTIL_H__
 
 #define SEC_LEVEL_HIGH 0x0001
-#define SEC_LEVEL_HIGH 0x0000
+#define SEC_LEVEL_LOW 0x0000
 #define FILE_NOT_FOUND 0x0001
 #define FILE_TOO_LARGE 0x0002
 
