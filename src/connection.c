@@ -134,6 +134,8 @@ off_t connection_download_client(int sock, struct sockaddr_in *serv_adr, char *f
 
     if(response_len == -1)
     	error_handling("fail connection error");
+    else if(((akh_pdu_header *)response)->msg_type == EA)
+        error_handling("server does not have file");
     else if(((akh_pdu_header *)response)->msg_type != AD)
     	error_handling("request rejected by server");
 
@@ -156,8 +158,13 @@ off_t connection_download_client(int sock, struct sockaddr_in *serv_adr, char *f
 // when client requests download, server uses the function to make connection
 void connection_download_server(int serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz, char *filename, off_t *filesize)
 {
-    akh_pdu_header header = createHeader(AD, randNum());
+    akh_pdu_header header;
     *filesize = get_file_size(filename);
+    if(*filesize != 0)
+        header = createHeader(AD, randNum());
+    else
+        header = createHeader(EA, randNum());
+
     packet response;
     size_t response_len = createPacket(&response, &header, (akh_pdu_body)filesize, sizeof(off_t));
 
@@ -165,6 +172,9 @@ void connection_download_server(int serv_sock, struct sockaddr_in *clnt_adr, soc
 
     sendto(serv_sock, response, response_len, 0, (struct sockaddr *)clnt_adr, *clnt_adr_sz);
     deletePacket(response);
+
+    if(header.msg_type == EA)
+        error_handling("server does not have file");
 
     puts("< accept download >");
     displayHeader(header);
@@ -219,14 +229,22 @@ int connection_upload_client(int sock, struct sockaddr_in *serv_adr, char *filen
 }
 
 // when client requests upload, server uses the function to make connection
-void connection_upload_server(int serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz)
+void connection_upload_server(int serv_sock, struct sockaddr_in *clnt_adr, socklen_t *clnt_adr_sz, off_t *filesize)
 {
     akh_pdu_header header = createHeader(AU, randNum());
+    if(*filesize > 1024) // greater than 1KB reject
+        header = createHeader(DR, randNum());
+    else
+        header = createHeader(AU, randNum());
+
     packet response;
     size_t response_len = createPacket(&response, &header, NULL, 0);
 
     sendto(serv_sock, response, response_len, 0, (struct sockaddr *)clnt_adr, *clnt_adr_sz);
     deletePacket(response);
+
+    if(*filesize > 1024) // greater than 1KB reject
+        error_handling("request filesize is big");
 
     puts("< accept upload >");
     displayHeader(header);
