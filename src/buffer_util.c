@@ -1,3 +1,19 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: the header file of buffer_util.c
+ *	    1. get_seqnum: get seqence number from packet
+ *	    2. get_parent: get parent index
+ *	    3. get_right: get right child index
+ *	    4. get_left: get left child index
+ *	    5. swap: swap two heap node in the array
+ *      6. heapify: arrange elements to form a heap by floating elements down
+ *      7. heapify_up: arrange elements to form a heap by floating elements up
+ *      8. create_buffer: create a buffer, allocating memory and initializing fileds
+ *      9. free_buffer: free memory that is allocated to the buffer
+ *      10. push: add an element into buffer
+ *      11. pop: get an element out from buffer
+ * * */
 #include <stdlib.h>
 #include <string.h>
 
@@ -85,7 +101,15 @@ void free_buffer(buffer** h) {
 	*h = NULL;
 }
 
-// return 1 if successful, 0 if the buffer is filled, -1 if error
+/**
+* push packet into buffer
+*
+* @param buffer, packet, size of packet
+*
+* @return int
+* @Description: return 1 if successful, 0 if the buffer is filled, -1 if error
+*
+**/
 int push(buffer* h, packet pac, ssize_t pac_size) {
 	if(h == NULL) return -1;
 	if(h->count == h->capacity) return 0;
@@ -108,7 +132,15 @@ int push(buffer* h, packet pac, ssize_t pac_size) {
 	return 1;
 }
 
-// return 1 if successful, 0 if buffer is empty, -1 if error 
+/**
+* pop packet from buffer
+*
+* @param buffer, packet, size of packet
+*
+* @return int
+* @Description: return 1 if successful, 0 if buffer is empty, -1 if error 
+*
+**/
 int pop(buffer* h, packet* pac, ssize_t* pac_size) {
 	if(h == NULL) return -1;
 	if(h->count == 0) return 0;
