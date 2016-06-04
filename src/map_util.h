@@ -1,3 +1,9 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: the header file of map_util.c
+ *     the functions in the file help to manage map
+ * * */
 #ifndef __MAP_UTIL_H__
 #define __MAP_UTIL_H__
 

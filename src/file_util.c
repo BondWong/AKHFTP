@@ -1,3 +1,9 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: the header file of buffer_util.c
+ *     the functions in the file help to manage buffer
+ * * */
 #include "error_handling.h"
 #include "file_util.h"
 

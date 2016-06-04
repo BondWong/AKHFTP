@@ -9,6 +9,7 @@
 #include "message.h"
 #include "map.h"
 
+// heap node is the element stored in the heap
 struct heap_node
 {
     packet pac;
@@ -17,6 +18,11 @@ struct heap_node
 
 typedef struct heap_node buffer_element;
 
+/**
+* use heap to work as buffer
+* capacity is the size allocated to the element array
+* count is how many element are there in the array currenly
+**/
 struct heap 
 {
     struct heap_node* elements;

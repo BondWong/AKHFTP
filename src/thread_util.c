@@ -79,7 +79,7 @@ void* clnt_thread_callback(void* thread_arg) {
     }
     else if(request_type == RU) {
         puts("I clnt thread gets RU packet");
-        connection_upload_server(serv_sock, &clnt_adr, &clnt_adr_sz);
+        connection_upload_server(serv_sock, &clnt_adr, &clnt_adr_sz, &filesize);
 
         uint32_t body_size = 100; 
         int num_time_out = 0;

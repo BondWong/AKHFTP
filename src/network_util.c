@@ -1,3 +1,10 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: the header file of buffer_util.c
+ *	    1. timer_recvfrom: a recvfrom function with timer support
+ *	    2. akh_send: a sendto and recvfrom function combination with timer support, used for connection creation
+ * * */
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>

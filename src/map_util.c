@@ -1,3 +1,15 @@
+/* Class Name: CS544 Computer networks
+ * Date: 6/2/2016
+ * Group member: Jae Hoon Kim, Junking Huang, Ni An
+ * Purpose: the header file of buffer_util.c
+ *	    1. hash_code: get hash code for a given key and map capacity
+ *	    2. create_map: create a map, allocating memory and initializing fields
+ *	    3. free_map: deallocating memory of a map, setting fields to default value
+ *	    4. put: put a node into the map for a giving key
+ *	    5. get: get a node from map according to a giving key
+ *      6. contains: to see whether the map contains an element
+ *      7. remove_elem: remove a node in map according to a giving key
+ * * */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,6 +50,15 @@ void free_map(map** m) {
 	*m = NULL;
 }
 
+/**
+* put an element into map with a given key
+*
+* @param map, key, element
+*
+* @return int
+* @Description: return 1 if successful
+*
+**/
 int put(map* m, uint32_t key, map_elem element) {
 	uint32_t hash = hash_code(key, m->capacity);
 	printf("putting key %d, seqnum %d, hash %d\n", key, element->seqnum, hash);
@@ -56,6 +77,15 @@ int put(map* m, uint32_t key, map_elem element) {
 	return 1;
 }
 
+/**
+* check whether a map contains an element
+*
+* @param map, element
+*
+* @return int
+* @Description: return 1 if contains, return 0 if not
+*
+**/
 int contains(map* m, map_elem element) {
 	uint32_t hash = hash_code(element->seqnum, m->capacity);
 
@@ -68,6 +98,14 @@ int contains(map* m, map_elem element) {
 	return 1;
 }
 
+/**
+* get an element from map
+*
+* @param map, key, element
+*
+* @return void
+*
+**/
 void get(map* m, uint32_t key, map_elem* element) {
 	uint32_t hash = hash_code(key, m->capacity);
     printf("getting key: %d, hash %d...\n", key, hash);
@@ -80,6 +118,14 @@ void get(map* m, uint32_t key, map_elem* element) {
 	(*element) = runner;
 }
 
+/**
+* remove an element from map with a given key
+*
+* @param map, key
+*
+* @return void
+*
+**/
 void remove_elem(map* m, uint32_t key) {
 	uint32_t hash = hash_code(key, m->capacity);
 
