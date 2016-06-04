@@ -39,3 +39,5 @@ Fo the test case, we made limitation of server application. If client requests u
 To test that, type 'make run_client_upload2'
 After client requests upload, it gets back deny message from server because the file size is greater than 1 KB.
 
+## Extra Credit:
+We did not implement extra credit task.
