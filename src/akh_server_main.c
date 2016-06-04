@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
     // initialize thread local storage key
     pthread_key_create(&thread_key, NULL);
 
+    /******************** CONCURRENT *********************/
     // Only the monitor thread will watch the socket
     while(1) {
         puts("Monitor waiting incoming packet...");
